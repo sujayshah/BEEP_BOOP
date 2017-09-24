@@ -78,18 +78,18 @@ def bfs_search(mapname):
 		if len(frontier) == 0:
 			return None
 		node = frontier.popleft()
+		cur_x = node.x 
+		cur_y = node.y
 		explored[node] = node.x + node.y
 
-		print 'in loop'
 		#if can move right, move right
 		if cur_x < right_bound and maze[cur_y][0][cur_x+1]!= '%': 
 			child = Node(cur_x + 1, cur_y, 0) #initialize child node
 			child.parent = node
 			if child not in explored and child not in frontier: #if child not in explored/frontier
 				#check if child is goal 
-				print 'hello'
 				if (child.x == x_end and child.y == y_end):
-					#return child
+					return child
 					print 'right'
 				#insert child to frontier
 				frontier.append(child)
@@ -101,7 +101,7 @@ def bfs_search(mapname):
 			if child not in explored and child not in frontier: #if child not in explored/frontier
 				#check if child is goal 
 				if (child.x == x_end and child.y == y_end):
-					#return child
+					return child
 					print 'down'
 				#insert child to frontier
 				frontier.append(child)
@@ -113,7 +113,7 @@ def bfs_search(mapname):
 			if child not in explored and child not in frontier: #if child not in explored/frontier
 				#check if child is goal 
 				if (child.x == x_end and child.y == y_end):
-					#return child
+					return child
 					print 'up'
 				#insert child to frontier
 				frontier.append(child)
@@ -125,7 +125,7 @@ def bfs_search(mapname):
 			if child not in explored and child not in frontier: #if child not in explored/frontier
 				#check if child is goal 
 				if (child.x == x_end and child.y == y_end):
-					#return child
+					return child
 					print 'left'
 				#insert child to frontier
 				frontier.append(child)
