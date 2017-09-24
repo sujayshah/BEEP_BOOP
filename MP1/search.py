@@ -60,12 +60,12 @@ def find_start_end(mapname):
 def bfs_search(mapname): 
 	maze = read_map(mapname)
 
-	root = Node(x_start, y_start)
-	cost = 0 
-	cur_x = 0 
-	cur_y = 0 
+	node = Node(x_start, y_start)
+	#cost = 0 
+	cur_x = x_start
+	cur_y = y_start
 
-	if(root.x == x_end and root.y == y_end):
+	if(node.x == x_end and node.y == y_end):
 		return root ##return solution
 	
 	frontier = Queue.Queue()
@@ -79,9 +79,16 @@ def bfs_search(mapname):
 		explored.append(node)
 
 		#if can move right, move right
-		#if x_start 
-
-
+		if x_start < right_bound: 
+			child = Node(right_bound + 1, cur_y) #initialize child node
+			#set pointer on parent node
+			#check if child is in explored
+			#check if child is in frontier
+			#check if child is goal 
+			if (child.x == x_end and child.y == y_end):
+				return child
+			#insert child to frontier
+			frontier.put(child)
 
 
 # Main function
