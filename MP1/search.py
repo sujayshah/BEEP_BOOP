@@ -1,4 +1,5 @@
 import Queue
+from node import Node
 
 # global definition# 
 x_start = 0
@@ -51,27 +52,32 @@ def find_start_end(mapname):
 # This function conducts a BFS search of the maze. #
 def bfs_search(mapname): 
 	maze = read_map(mapname)
-	cur_x = 0 
-	cur_y = 0 	
 
-	frontier = Queue.Queue()
+	root = Node(x_start, y_start)
+	cost = 0 
+	cur_x = 0 
+	cur_y = 0 
+
+	if(root.x == x_end and root.y == y_end):
+		return root ##return solution
+	
+	#frontier = Queue.Queue()
+	#frontier.put(root)
+	#while()
+
 
 
 # Main function
 def main():
-	lines2= read_map("mediumMaze.txt")
+	maze= read_map("mediumMaze.txt")
 	#write_test_map("tinySearch_test.txt")
 
-	for line in lines2:
+	for line in maze:
 		for s in line: 
 			print s
 
 	find_start_end("mediumMaze.txt")
 	bfs_search("mediumMaze.txt")
-
-	#print "Main print: "
-	print x_start
-	print y_start
 
 if __name__ == "__main__":
 	main()
