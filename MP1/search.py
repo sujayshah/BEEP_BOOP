@@ -6,9 +6,12 @@ x_start = 0
 y_start = 0
 x_end = 0 
 y_end = 0
+right_bound = 0
+down_bound = 0 
 
 # This function reads in the maze from the text file and generates the 
-# 2D array to traverse through.  									   
+# 2D array to traverse through. NOTE: to access (x,y) locations in the maze
+# you must call it as maze[y][0][x]. 									   
 def read_map(mapname):
 	textFile = open(mapname, "r")
 	maze = []
@@ -38,6 +41,8 @@ def find_start_end(mapname):
 	global y_start
 	global x_end 
 	global y_end
+	global right_bound
+	global down_bound
 
 	for ypos, line in enumerate(maze):
 		for string in line:
@@ -47,7 +52,9 @@ def find_start_end(mapname):
 					y_start = ypos 
 				if char == '.':
 					x_end = xpos 
-					y_end = ypos	
+					y_end = ypos
+			right_bound = xpos
+		down_bound = ypos				
 
 # This function conducts a BFS search of the maze. #
 def bfs_search(mapname): 
@@ -61,9 +68,19 @@ def bfs_search(mapname):
 	if(root.x == x_end and root.y == y_end):
 		return root ##return solution
 	
-	#frontier = Queue.Queue()
-	#frontier.put(root)
-	#while()
+	frontier = Queue.Queue()
+	frontier.put(root)
+
+	explored = []
+	while not frontier.empty(): #temporary loop 
+		if frontier.empty():
+			return None
+		node = frontier.get()
+		explored.append(node)
+
+		#if can move right, move right
+		#if x_start 
+
 
 
 
@@ -77,7 +94,14 @@ def main():
 			print s
 
 	find_start_end("mediumMaze.txt")
-	bfs_search("mediumMaze.txt")
+	print "START COORDINATES:" + str(x_start) + ", " + str(y_start)
+	print right_bound 
+	print down_bound
+ 	#print "PRINTING CHARACTER: "
+	#print maze[21][0][1]
+	#print maze[21][0][2]
+	
+	#bfs_search("mediumMaze.txt")
 
 if __name__ == "__main__":
 	main()
