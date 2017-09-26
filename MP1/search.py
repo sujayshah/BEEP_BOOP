@@ -24,7 +24,7 @@ def read_map(mapname):
 	return maze
 
 # This function writes back to a text file our 2D array that we read in. 
-# Namely used to verify we read in text file correctly.
+# Namely used to verify we read in text file correctly. DO NOT CALL.
 def write_test_map(mapname):
 	maze = read_map(mapname)
 
@@ -229,6 +229,7 @@ def dfs_search(mapname):
 		# 		frontier.append((child.x, child.y))
 	return None 
 		
+# This function draws the solution on the input maze. 		
 def draw_solution(mapname, solution_path):
 	maze = read_map(mapname)
 	writemap = mapname[:-4] + "test.txt"
@@ -248,23 +249,21 @@ def draw_solution(mapname, solution_path):
 # Main function
 def main(mapname):
 	maze= read_map(mapname)
-	#write_test_map("tinySearch_test.txt")
 
 	for line in maze:
 		for s in line: 
 			print s
 
 	find_start_end(mapname)
-	print "START COORDINATES:" + str(x_start) + ", " + str(y_start)
-	print right_bound 
-	print down_bound
+	print "START COORDINATES: (" + str(x_start) + ", " + str(y_start) + ")"
+	print "DIMENSIONS: " + str(right_bound) + " by " + str(down_bound)
 	
 	solution = []
 
 	temp = bfs_search(mapname)
 	if temp != None: 
 		print 'SUCCESS!'
-		print 'End located at: ' + str(temp.x ) + ", " + str(temp.y) 
+		print 'End located at: (' + str(temp.x ) + ", " + str(temp.y)  + ")"
 		while(temp!= None):
 			#print 'path: ' + str(temp.x) + ", " + str(temp.y)
 			solution.append ((temp.x, temp.y))
@@ -272,6 +271,7 @@ def main(mapname):
 
 	#print solution
 	draw_solution(mapname, solution)
+	print "Solution drawn to " + mapname[:-4] + "test.txt"
 
 if __name__ == "__main__":
 	main("mediumMaze.txt")
