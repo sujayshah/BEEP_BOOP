@@ -127,6 +127,7 @@ def bfs_search(mapname):
 				frontiernode.append(child)
 	return None 
 
+# This function implements a depth-first search of the maze and prints the solution in text file.
 def dfs_search(mapname): 
 	maze = read_map(mapname)
 
@@ -138,10 +139,15 @@ def dfs_search(mapname):
 		return node #return solution
 	
 	frontier = []
-	
-	#print "ADDING: " + str(cur_x) + ", " + str(cur_y)
+
+	print "ADDING: " + str(cur_x) + ", " + str(cur_y)
+
 	frontier.append(node.x)
 	frontier.append(node.y)
+	
+	frontiernode = deque([])
+	frontiernode.append(node)
+	# parentNode = frontiernode.popleft()
 
 	explored = {}
 
@@ -149,17 +155,16 @@ def dfs_search(mapname):
 		if len(frontier) == 0:
 			return None
 
-		# cur_y = frontier.pop()
-		# cur_x = frontier.pop()
-
 		explored[(cur_x, cur_y)]= cur_x + cur_y
 		#print "EXPLORING: " + str(cur_x) + ", " + str(cur_y)
 
 			#if can move right, move right
 		if cur_x < right_bound and maze[cur_y][0][cur_x+1]!= '%' and (cur_x+1, cur_y) not in explored: 
 			child = Node(cur_x + 1, cur_y, 0) #initialize child node
-				
-			#print "examining: " + str(cur_x + 1) + ", " + str(cur_y)
+
+			child.parent = parentNode 	
+			print "examining: " + str(cur_x + 1) + ", " + str(cur_y)
+
 			#child.parent = node
 			#if child not in explored and child not in frontier: #if child not in explored/frontier
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:	
@@ -172,16 +177,16 @@ def dfs_search(mapname):
 				#frontier.append(child)
 				frontier.append(child.x)
 				frontier.append(child.y)
+				frontiernode.append(child)
 				cur_x = child.x
 				cur_y = child.y
 
 		
-		#print "x ", cur_x, " y ", cur_y,
-		
 		#	if can move down, move down
 		elif cur_y < down_bound and maze[cur_y + 1][0][cur_x]!= '%' and (cur_x, cur_y+1) not in explored: 
 			child = Node(cur_x, cur_y + 1, 1)#initialize child node
-			#print "examining: " + str(cur_x) + ", " + str(cur_y + 1)
+			child.parent = parentNode
+			print "examining: " + str(cur_x) + ", " + str(cur_y + 1)
 			#child.parent = node
 			#if child not in explored and child not in frontier: #if child not in explored/frontier
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
@@ -194,13 +199,17 @@ def dfs_search(mapname):
 				#frontier.append(child)
 				frontier.append(child.x)
 				frontier.append(child.y)
+				frontiernode.append(child)
 				cur_x = child.x
 				cur_y = child.y
 
 		# #if can move up, move up
 		elif cur_y > 0 and maze[cur_y - 1][0][cur_x]!= '%' and (cur_x, cur_y-1) not in explored:
 			child = Node(cur_x, cur_y - 1, 2) #initialize child node
-			#print "examining: " + str(cur_x) + ", " + str(cur_y-1)
+			
+			child.parent = parentNode 
+			print "examining: " + str(cur_x) + ", " + str(cur_y-1)
+
 			#child.parent = node
 			#if child not in explored and child not in frontier: #if child not in explored/frontier
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
@@ -213,13 +222,15 @@ def dfs_search(mapname):
 				#frontier.append(child)
 				frontier.append(child.x)
 				frontier.append(child.y)
+				frontiernode.append(child)
 				cur_x = child.x
 				cur_y = child.y
 			
 			#if can move left, move left
 		elif cur_y > 0 and maze[cur_y][0][cur_x-1]!= '%' and (cur_x-1, cur_y) not in explored: 
 			child = Node(cur_x - 1, cur_y, 3) #initialize child node
-			#print "examining: " + str(cur_x - 1) + ", " + str(cur_y)
+			child.parent = parentNode
+			print "examining: " + str(cur_x - 1) + ", " + str(cur_y)
 			#child.parent = node
 			#if child not in explored and child not in frontier: #if child not in explored/frontier
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
@@ -232,12 +243,17 @@ def dfs_search(mapname):
 				#frontier.append(child)
 				frontier.append(child.x) 
 				frontier.append(child.y)
+				frontiernode.append(child)
 				cur_x = child.x
 				cur_y = child.y
 		else:
 			cur_y = frontier.pop()
 			cur_x = frontier.pop()
-		
+	
+def aStar(mapname):
+	maze = read_map(mapname)
+
+
 # This function draws the solution on the input maze. 		
 def draw_solution(mapname, solution_path):
 	maze = read_map(mapname)
@@ -271,8 +287,12 @@ def main(mapname):
 	if temp != None: 
 		print 'SUCCESS!'
 		print 'End located at: (' + str(temp.x ) + ", " + str(temp.y)  + ")"
-		while(temp!= None):
-			print 'path: ' + str(temp.x) + ", " + str(temp.y)
+
+		#while(temp!= None):
+		#print 'path: ' + str(temp.x) + ", " + str(temp.y)
+
+		while(temp != None):
+			print temp.x, temp.y
 			solution.append ((temp.x, temp.y))
 			temp = temp.parent
 
@@ -282,4 +302,3 @@ def main(mapname):
 
 if __name__ == "__main__":
 	main("mediumMaze.txt")
-	
