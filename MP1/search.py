@@ -71,7 +71,6 @@ def bfs_search(mapname):
 	#frontier.append(node)
 	frontier.append((node.x, node.y))
 	
-	#explored = deque([])
 	explored = {}
 	while 1:
 		if len(frontier) == 0:
@@ -85,67 +84,44 @@ def bfs_search(mapname):
 
 		explored[(cur_x, cur_y)]= cur_x + cur_y
 		#explored[node] = node.x + node.y
-		
-		#print "EXPLORING: " + str(cur_x) + ", " + str(cur_y)
 
 		#if can move right, move right
 		if cur_x < right_bound and maze[cur_y][0][cur_x+1]!= '%': 
 			child = Node(cur_x + 1, cur_y, 0) #initialize child node
-			#print "examining: " + str(cur_x + 1) + ", " + str(cur_y)
 			#child.parent = node
-			#if child not in explored and child not in frontier: #if child not in explored/frontier
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:	
-				#check if child is goal 
 				if (child.x == x_end and child.y == y_end):
-					#print 'right'
 					return child
-				#insert child to frontier
-				#print "ADDING: " + str(cur_x + 1) + ", " + str(cur_y)
 				#frontier.append(child)
 				frontier.append((child.x, child.y))
+
 		#if can move down, move down
 		if cur_y < down_bound and maze[cur_y + 1][0][cur_x]!= '%': 
 			child = Node(cur_x, cur_y + 1, 1)#initialize child node
-			#print "examining: " + str(cur_x) + ", " + str(cur_y + 1)
 			#child.parent = node
-			#if child not in explored and child not in frontier: #if child not in explored/frontier
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
-				#check if child is goal 
 				if (child.x == x_end and child.y == y_end):
-					#print 'down'
 					return child
-				#insert child to frontier
-				#print "ADDING: " + str(cur_x) + ", " + str(cur_y + 1)
 				#frontier.append(child)
 				frontier.append((child.x, child.y))
+
 		#if can move up, move up
 		if cur_y > 0 and maze[cur_y - 1][0][cur_x]!= '%':
 			child = Node(cur_x, cur_y - 1, 2) #initialize child node
-			#print "examining: " + str(cur_x) + ", " + str(cur_y-1)
 			#child.parent = node
-			#if child not in explored and child not in frontier: #if child not in explored/frontier
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
-				#check if child is goal 
 				if (child.x == x_end and child.y == y_end):
-					#print 'up'
 					return child
-				#insert child to frontier
-				#print "ADDING: " + str(cur_x) + ", " + str(cur_y - 1)
-				#frontier.append(child)
+				#frontier.append(child)	
 				frontier.append((child.x, child.y))
+
 		#if can move left, move left
 		if cur_y > 0 and maze[cur_y][0][cur_x-1]!= '%': 
 			child = Node(cur_x - 1, cur_y, 3) #initialize child node
-			#print "examining: " + str(cur_x - 1) + ", " + str(cur_y)
 			#child.parent = node
-			#if child not in explored and child not in frontier: #if child not in explored/frontier
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
-				#check if child is goal 
 				if (child.x == x_end and child.y == y_end):
-					#print 'left'
 					return child
-				#insert child to frontier
-				#print "ADDING: " + str(cur_x - 1) + ", " + str(cur_y)
 				#frontier.append(child)
 				frontier.append((child.x, child.y))
 	return None 
@@ -188,9 +164,6 @@ def main():
 	print "START COORDINATES:" + str(x_start) + ", " + str(y_start)
 	print right_bound 
 	print down_bound
- 	#print "PRINTING CHARACTER: "
-	#print maze[21][0][1]
-	#print maze[21][0][2]
 	
 	temp = bfs_search("openMaze.txt")
 	if temp != None: 
