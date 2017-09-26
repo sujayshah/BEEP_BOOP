@@ -138,16 +138,13 @@ def dfs_search(mapname):
 	if(node.x == x_end and node.y == y_end):
 		return node #return solution
 	
-	frontier = []
-
-	print "ADDING: " + str(cur_x) + ", " + str(cur_y)
-
-	frontier.append(node.x)
-	frontier.append(node.y)
-	
+	frontier = deque([])
 	frontiernode = deque([])
+
+	frontier.append((node.x, node.y))
 	frontiernode.append(node)
-	# parentNode = frontiernode.popleft()
+
+	parentNode = frontiernode.pop()
 
 	explored = {}
 
@@ -156,99 +153,72 @@ def dfs_search(mapname):
 			return None
 
 		explored[(cur_x, cur_y)]= cur_x + cur_y
-		#print "EXPLORING: " + str(cur_x) + ", " + str(cur_y)
 
-			#if can move right, move right
+		#if can move right, move right
 		if cur_x < right_bound and maze[cur_y][0][cur_x+1]!= '%' and (cur_x+1, cur_y) not in explored: 
-			child = Node(cur_x + 1, cur_y, 0) #initialize child node
-
+			child = Node(cur_x + 1, cur_y, 0) 
 			child.parent = parentNode 	
-			print "examining: " + str(cur_x + 1) + ", " + str(cur_y)
-
-			#child.parent = node
-			#if child not in explored and child not in frontier: #if child not in explored/frontier
+		
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:	
 				#check if child is goal 
 				if (child.x == x_end and child.y == y_end):
-					#print 'right'
 					return child
-				#insert child to frontier
-				#print "ADDING: " + str(cur_x + 1) + ", " + str(cur_y)
-				#frontier.append(child)
-				frontier.append(child.x)
-				frontier.append(child.y)
+
+				frontier.append((child.x, child.y))
 				frontiernode.append(child)
 				cur_x = child.x
 				cur_y = child.y
 
 		
-		#	if can move down, move down
+		#if can move down, move down
 		elif cur_y < down_bound and maze[cur_y + 1][0][cur_x]!= '%' and (cur_x, cur_y+1) not in explored: 
-			child = Node(cur_x, cur_y + 1, 1)#initialize child node
+			child = Node(cur_x, cur_y + 1, 1)
 			child.parent = parentNode
-			print "examining: " + str(cur_x) + ", " + str(cur_y + 1)
-			#child.parent = node
-			#if child not in explored and child not in frontier: #if child not in explored/frontier
+
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
-				#check if child is goal 
 				if (child.x == x_end and child.y == y_end):
-					#print 'down'
 					return child
-				#insert child to frontier
-				#print "ADDING: " + str(cur_x) + ", " + str(cur_y + 1)
-				#frontier.append(child)
-				frontier.append(child.x)
-				frontier.append(child.y)
+
+				frontier.append((child.x, child.y))
 				frontiernode.append(child)
 				cur_x = child.x
 				cur_y = child.y
 
 		# #if can move up, move up
 		elif cur_y > 0 and maze[cur_y - 1][0][cur_x]!= '%' and (cur_x, cur_y-1) not in explored:
-			child = Node(cur_x, cur_y - 1, 2) #initialize child node
-			
+			child = Node(cur_x, cur_y - 1, 2) 		
 			child.parent = parentNode 
-			print "examining: " + str(cur_x) + ", " + str(cur_y-1)
-
-			#child.parent = node
-			#if child not in explored and child not in frontier: #if child not in explored/frontier
+			
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
-				#check if child is goal 
 				if (child.x == x_end and child.y == y_end):
-					#print 'up'
 					return child
-				#insert child to frontier
-				#print "ADDING: " + str(cur_x) + ", " + str(cur_y - 1)
-				#frontier.append(child)
-				frontier.append(child.x)
-				frontier.append(child.y)
+				
+				frontier.append((child.x, child.y))
 				frontiernode.append(child)
 				cur_x = child.x
 				cur_y = child.y
 			
-			#if can move left, move left
-		elif cur_y > 0 and maze[cur_y][0][cur_x-1]!= '%' and (cur_x-1, cur_y) not in explored: 
-			child = Node(cur_x - 1, cur_y, 3) #initialize child node
+		#if can move left, move left
+		elif cur_x > 0 and maze[cur_y][0][cur_x-1]!= '%' and (cur_x-1, cur_y) not in explored: 
+			child = Node(cur_x - 1, cur_y, 3) 
 			child.parent = parentNode
-			print "examining: " + str(cur_x - 1) + ", " + str(cur_y)
-			#child.parent = node
-			#if child not in explored and child not in frontier: #if child not in explored/frontier
+		
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
-				#check if child is goal 
 				if (child.x == x_end and child.y == y_end):
-					#print 'left'
 					return child
 				#insert child to frontier
-				print "ADDING: " + str(cur_x - 1) + ", " + str(cur_y)
-				#frontier.append(child)
-				frontier.append(child.x) 
-				frontier.append(child.y)
+				frontier.append((child.x, child.y))
 				frontiernode.append(child)
 				cur_x = child.x
 				cur_y = child.y
+
 		else:
-			cur_y = frontier.pop()
-			cur_x = frontier.pop()
+			curnode = frontier.pop()
+			cur_y = curnode[0]
+			cur_x = curnode[1]
+			parentNode = frontiernode.pop()
+
+	#return None
 	
 def aStar(mapname):
 	maze = read_map(mapname)
