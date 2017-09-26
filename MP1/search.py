@@ -164,6 +164,7 @@ def dfs_search(mapname):
 				if (child.x == x_end and child.y == y_end):
 					return child
 
+				print "Adding: " + str(child.x) + ", " + str(child.y)
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
 				cur_x = child.x
@@ -179,6 +180,7 @@ def dfs_search(mapname):
 				if (child.x == x_end and child.y == y_end):
 					return child
 
+				print "Adding: " + str(child.x) + ", " + str(child.y)
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
 				cur_x = child.x
@@ -192,7 +194,8 @@ def dfs_search(mapname):
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
 				if (child.x == x_end and child.y == y_end):
 					return child
-				
+
+				print "Adding: " + str(child.x) + ", " + str(child.y)
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
 				cur_x = child.x
@@ -206,7 +209,8 @@ def dfs_search(mapname):
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
 				if (child.x == x_end and child.y == y_end):
 					return child
-				#insert child to frontier
+
+				print "Adding: " + str(child.x) + ", " + str(child.y)
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
 				cur_x = child.x
@@ -214,8 +218,9 @@ def dfs_search(mapname):
 
 		else:
 			curnode = frontier.pop()
-			cur_y = curnode[0]
-			cur_x = curnode[1]
+			cur_x = curnode[0]
+			cur_y = curnode[1]
+			print "Removing: " + str(cur_x) + ", " + str(cur_y)
 			parentNode = frontiernode.pop()
 
 	#return None
