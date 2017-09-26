@@ -28,7 +28,7 @@ def read_map(mapname):
 def write_test_map(mapname):
 	maze = read_map(mapname)
 
-	with open(mapname, 'w') as outFile:
+	with open(mapname + 'test', 'w') as outFile:
 		for item in my_list:
 			outFile.write("%s\n"  %item)
 
@@ -77,16 +77,14 @@ def bfs_search(mapname):
 	while 1:
 		if len(frontier) == 0:
 			return None
-		#node = frontier.popleft()
+
 		node = frontier.popleft()
 		nodenode = frontiernode.popleft()
-		#cur_x = node.x 
-		#cur_y = node.y
+
 		cur_x = node[0]
 		cur_y = node[1]
 
 		explored[(cur_x, cur_y)]= cur_x + cur_y
-		#explored[node] = node.x + node.y
 
 		#if can move right, move right
 		if cur_x < right_bound and maze[cur_y][0][cur_x+1]!= '%': 
@@ -95,7 +93,6 @@ def bfs_search(mapname):
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:	
 				if (child.x == x_end and child.y == y_end):
 					return child
-				#frontier.append(child)
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
 
@@ -106,7 +103,6 @@ def bfs_search(mapname):
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
 				if (child.x == x_end and child.y == y_end):
 					return child
-				#frontier.append(child)
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
 
@@ -117,7 +113,6 @@ def bfs_search(mapname):
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
 				if (child.x == x_end and child.y == y_end):
 					return child
-				#frontier.append(child)	
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
 
@@ -128,7 +123,6 @@ def bfs_search(mapname):
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
 				if (child.x == x_end and child.y == y_end):
 					return child
-				#frontier.append(child)
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
 	return None 
@@ -235,29 +229,48 @@ def dfs_search(mapname):
 		# 		frontier.append((child.x, child.y))
 	return None 
 		
+def draw_solution(mapname, solution_path):
+	maze = read_map("mediumMaze.txt")
+
+	with open(mapname, 'w') as outFile:
+		for ypos, line in enumerate(maze):
+			for string in line:
+				for xpos, char in enumerate(string):
+					if (xpos, ypos) in solution_path and (xpos, ypos)!= (x_start, y_start): 
+						outFile.write('.')
+				 	else:
+						outFile.write(char)
+			outFile.write('\n')
+
+
 
 # Main function
 def main():
-	maze= read_map("tinySearch.txt")
+	maze= read_map("mediumMaze.txt")
 	#write_test_map("tinySearch_test.txt")
 
 	for line in maze:
 		for s in line: 
 			print s
 
-	find_start_end("tinySearch.txt")
+	find_start_end("mediumMaze.txt")
 	print "START COORDINATES:" + str(x_start) + ", " + str(y_start)
 	print right_bound 
 	print down_bound
 	
-	temp = bfs_search("tinySearch.txt")
+	solution = []
+
+	temp = bfs_search("mediumMaze.txt")
 	if temp != None: 
 		print 'SUCCESS!'
 		print 'End located at: ' + str(temp.x ) + ", " + str(temp.y) 
 		while(temp!= None):
-			print 'path: ' + str(temp.x) + ", " + str(temp.y)
+			#print 'path: ' + str(temp.x) + ", " + str(temp.y)
+			solution.append ((temp.x, temp.y))
 			temp = temp.parent
-		
+
+	#print solution
+	draw_solution("mediumMazetest.txt", solution)
 
 if __name__ == "__main__":
 	main()
