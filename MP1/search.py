@@ -65,7 +65,7 @@ def bfs_search(mapname):
 	cur_y = y_start
 
 	if(node.x == x_end and node.y == y_end):
-		return root ##return solution
+		return node ##return solution
 	
 	frontier = deque([])
 	frontiernode = deque([])
@@ -230,9 +230,10 @@ def dfs_search(mapname):
 	return None 
 		
 def draw_solution(mapname, solution_path):
-	maze = read_map("mediumMaze.txt")
+	maze = read_map(mapname)
+	writemap = mapname[:-4] + "test.txt"
 
-	with open(mapname, 'w') as outFile:
+	with open(writemap, 'w') as outFile:
 		for ypos, line in enumerate(maze):
 			for string in line:
 				for xpos, char in enumerate(string):
@@ -270,7 +271,7 @@ def main():
 			temp = temp.parent
 
 	#print solution
-	draw_solution("mediumMazetest.txt", solution)
+	draw_solution("mediumMaze.txt", solution)
 
 if __name__ == "__main__":
 	main()
