@@ -246,22 +246,22 @@ def draw_solution(mapname, solution_path):
 
 
 # Main function
-def main():
-	maze= read_map("mediumMaze.txt")
+def main(mapname):
+	maze= read_map(mapname)
 	#write_test_map("tinySearch_test.txt")
 
 	for line in maze:
 		for s in line: 
 			print s
 
-	find_start_end("mediumMaze.txt")
+	find_start_end(mapname)
 	print "START COORDINATES:" + str(x_start) + ", " + str(y_start)
 	print right_bound 
 	print down_bound
 	
 	solution = []
 
-	temp = bfs_search("mediumMaze.txt")
+	temp = bfs_search(mapname)
 	if temp != None: 
 		print 'SUCCESS!'
 		print 'End located at: ' + str(temp.x ) + ", " + str(temp.y) 
@@ -271,7 +271,7 @@ def main():
 			temp = temp.parent
 
 	#print solution
-	draw_solution("mediumMaze.txt", solution)
+	draw_solution(mapname, solution)
 
 if __name__ == "__main__":
-	main()
+	main("mediumMaze.txt")
