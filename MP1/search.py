@@ -150,6 +150,31 @@ def bfs_search(mapname):
 				frontier.append((child.x, child.y))
 	return None 
 
+def dfs_search(mapname): 
+	maze = read_map(mapname)
+
+	node = Node(x_start, y_start, None)
+	cur_x = x_start
+	cur_y = y_start
+
+	if(node.x == x_end and node.y == y_end):
+		return root ##return solution
+	
+	stackX = []
+	stackY = []
+	stackX.append(node.x)
+	stackY.append(node.y)
+
+	explored = {}
+
+	while 1:
+		if len(stackX) and len(stackY) == 0:
+			return None
+		
+		node = stackX.pop()
+		
+		
+
 # Main function
 def main():
 	maze= read_map("openMaze.txt")
