@@ -56,6 +56,17 @@ def find_start_end(mapname):
 			right_bound = xpos
 		down_bound = ypos				
 
+def heuristic(point1, point2):
+	x1 = point1[0]
+	y1 = point1[1]
+
+	x2= point2[0]
+	y2= point2[1]
+
+	manhattan_distance = abs(x1 - x2) + abs(y1 - y2)
+
+	return manhattan_distance
+
 # This function conducts a BFS search of the maze. #
 def bfs_search(mapname): 
 	maze = read_map(mapname)
@@ -131,114 +142,31 @@ def bfs_search(mapname):
 				print "Adding: " + str(child.x) + ", " + str(child.y)
 	return None 
 
-# This function implements a depth-first search of the maze and prints the solution in text file.
-def dfs_search(mapname): 
-	maze = read_map(mapname)
-
-	node = Node(x_start, y_start, None)
-	cur_x = x_start
-	cur_y = y_start
-
-	if(node.x == x_end and node.y == y_end):
-		return node #return solution
-	
-	frontier = deque([])
-	frontiernode = deque([])
-
-	frontier.append((node.x, node.y))
-	frontiernode.append(node)
-
-	parentNode = frontiernode.pop()
-
-	explored = {}
-
-	while 1:
-		if len(frontier) == 0:
-			return None
-
-		explored[(cur_x, cur_y)]= cur_x + cur_y
-
-		#if can move right, move right
-		if cur_x < right_bound and maze[cur_y][0][cur_x+1]!= '%' and (cur_x+1, cur_y) not in explored: 
-			child = Node(cur_x + 1, cur_y, 0) 
-			child.parent = parentNode 
-			print "Parent is: " + str(parentNode.x) + ", " + str(parentNode.y)	
-		
-			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:	
-				#check if child is goal 
-				if (child.x == x_end and child.y == y_end):
-					return child
-
-				print "Adding: " + str(child.x) + ", " + str(child.y)
-				frontier.append((child.x, child.y))
-				frontiernode.append(child)
-				cur_x = child.x
-				cur_y = child.y
-				parentNode = frontiernode.pop()
-
-		
-		#if can move down, move down
-		elif cur_y < down_bound and maze[cur_y + 1][0][cur_x]!= '%' and (cur_x, cur_y+1) not in explored: 
-			child = Node(cur_x, cur_y + 1, 1)
-			child.parent = parentNode
-			print "Parent is: " + str(parentNode.x) + ", " + str(parentNode.y)
-
-			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
-				if (child.x == x_end and child.y == y_end):
-					return child
-
-				print "Adding: " + str(child.x) + ", " + str(child.y)
-				frontier.append((child.x, child.y))
-				frontiernode.append(child)
-				cur_x = child.x
-				cur_y = child.y
-				parentNode = frontiernode.pop()
-
-		# #if can move up, move up
-		elif cur_y > 0 and maze[cur_y - 1][0][cur_x]!= '%' and (cur_x, cur_y-1) not in explored:
-			child = Node(cur_x, cur_y - 1, 2) 		
-			child.parent = parentNode 
-			print "Parent is: " + str(parentNode.x) + ", " + str(parentNode.y)
-			
-			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
-				if (child.x == x_end and child.y == y_end):
-					return child
-
-				print "Adding: " + str(child.x) + ", " + str(child.y)
-				frontier.append((child.x, child.y))
-				frontiernode.append(child)
-				cur_x = child.x
-				cur_y = child.y
-				parentNode = frontiernode.pop()
-			
-		#if can move left, move left
-		elif cur_x > 0 and maze[cur_y][0][cur_x-1]!= '%' and (cur_x-1, cur_y) not in explored: 
-			child = Node(cur_x - 1, cur_y, 3) 
-			child.parent = parentNode
-			print "Parent is: " + str(parentNode.x) + ", " + str(parentNode.y)
-		
-			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
-				if (child.x == x_end and child.y == y_end):
-					return child
-
-				print "Adding: " + str(child.x) + ", " + str(child.y)
-				frontier.append((child.x, child.y))
-				frontiernode.append(child)
-				cur_x = child.x
-				cur_y = child.y
-				parentNode = frontiernode.pop()
-
-		else:
-			curnode = frontier.pop()
-			cur_x = curnode[0]
-			cur_y = curnode[1]
-			print "Removing: " + str(cur_x) + ", " + str(cur_y)
-
-	#return None
 	
 def aStar(mapname):
 	maze = read_map(mapname)
 
+def greedybfs(mapname):
+	maze = read_map(mapname)
+
+	node = Node(x_start, y_start, None)
+	cur_x = node.x 
+	cury_ y = node.y
+
+	frontier= dequeue([])
+
+	while()
+		#right
+		if cur_x < right_bound and maze[cur_y][0][cur_x+1]!= '%':
+
+		#down
+		if cur_y < down_bound and maze[cur_y + 1][0][cur_x]!= '%':
+
+		#up
+		if cur_y > 0 and maze[cur_y - 1][0][cur_x]!= '%':
+
+		#left
+		if cur_y > 0 and maze[cur_y][0][cur_x-1]!= '%':
 
 # This function draws the solution on the input maze. 		
 def draw_solution(mapname, solution_path):
