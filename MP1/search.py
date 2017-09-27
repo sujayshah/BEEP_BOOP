@@ -132,7 +132,7 @@ def bfs_search(mapname):
 				print "Adding: " + str(child.x) + ", " + str(child.y)
 
 		#if can move left, move left
-		if cur_y > 0 and maze[cur_y][0][cur_x-1]!= '%': 
+		if cur_x > 0 and maze[cur_y][0][cur_x-1]!= '%': 
 			child = Node(cur_x - 1, cur_y, 3) #initialize child node
 			child.parent = nodenode
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
@@ -141,12 +141,71 @@ def bfs_search(mapname):
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
 				print "Adding: " + str(child.x) + ", " + str(child.y)
-	return None 
-	
-def aStar(mapname):
+	return None
+
+def dfs_search(mapname):
 	maze = read_map(mapname)
 
-def greedybfs(mapname):
+	node = Node(x_start, y_start, None)
+	cur_x = x_start 
+	cur_y = y_start
+
+	if(cur_x == x_end and cur_y == y_end):
+		return node 
+
+	frontier = deque([])
+	frontiernode = deque([])
+	explored = deque([])
+
+	frontier.append((node.x, node.y))
+	frontiernode.append(node)
+	
+
+	while len(frontier) > 0:
+		nodenode = frontiernode.pop()
+		node = frontier.pop()
+		cur_x = node[0]
+		cur_y = node[1]
+
+		if (cur_x == x_end and cur_y == y_end):
+			return nodenode
+
+		explored.append((cur_x, cur_y))
+
+		#expand node
+		if cur_x < right_bound and maze[cur_y][0][cur_x+1]!= '%': 
+			child = Node(cur_x + 1, cur_y, 0) 
+			child.parent = nodenode
+			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
+				frontier.append((child.x, child.y))
+				frontiernode.append(child)
+
+		if cur_y < down_bound and maze[cur_y + 1][0][cur_x]!= '%':  
+			child = Node(cur_x, cur_y+1, 0) 
+			child.parent = nodenode
+			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
+				frontier.append((child.x, child.y))
+				frontiernode.append(child)
+
+		if cur_y > 0 and maze[cur_y - 1][0][cur_x]!= '%': 
+			child = Node(cur_x, cur_y - 1, 0) 
+			child.parent = nodenode
+			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
+				frontier.append((child.x, child.y))
+				frontiernode.append(child)
+
+		if cur_y > 0 and maze[cur_y][0][cur_x-1]!= '%':  
+			child = Node(cur_x - 1, cur_y, 0) 
+			child.parent = nodenode
+			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
+				frontier.append((child.x, child.y))
+				frontiernode.append(child)
+
+
+def aStar_search(mapname):
+	maze = read_map(mapname)
+
+def greedybfs_search(mapname):
 	maze = read_map(mapname)
 
 	node = Node(x_start, y_start, None)
@@ -265,12 +324,13 @@ def main(mapname):
 	
 	solution = []
 
-	temp2 = greedybfs(mapname)
-	temp = temp2[0]
-	cost = temp2[1]
+	#temp2 = greedybfs(mapname)
+	temp = dfs(mapname)
+	#temp = temp2[0]
+	#cost = temp2[1]
 	if temp != None: 
 		print 'SUCCESS!'
-		print 'End located at: (' + str(temp.x ) + ", " + str(temp.y)  + ")"
+		#print 'End located at: (' + str(temp.x ) + ", " + str(temp.y)  + ")"
 
 		#while(temp!= None):
 		#print 'path: ' + str(temp.x) + ", " + str(temp.y)
@@ -281,9 +341,9 @@ def main(mapname):
 			temp = temp.parent
 
 	#print solution
-	print "COST:" + str(cost)
+	#print "COST:" + str(cost)
 	draw_solution(mapname, solution)
 	print "Solution drawn to " + mapname[:-4] + "test.txt"
 
 if __name__ == "__main__":
-	main("tinySearch.txt")
+	main("mediumMaze.txt")

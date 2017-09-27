@@ -5,3 +5,4 @@ class Node:
 		self.y = ypos 
 		self.action = action
 		self.parent = None
+		self.state = None
