@@ -68,31 +68,27 @@ def heuristic(point1, point2):
 
 	return manhattan_distance
 
-# This function conducts a BFS search of the maze. Returns pointer to 
-# last solution node and total step cost as a tuple (node, cost).
+# This function conducts a BFS search of the maze. #
 def bfs_search(mapname): 
 	maze = read_map(mapname)
-
-	cost = 0 
-	expansion _counter = 0
 
 	node = Node(x_start, y_start, None)
 	cur_x = x_start
 	cur_y = y_start
 
 	if(node.x == x_end and node.y == y_end):
-		return (node, cost)
+		return node ##return solution
 	
 	frontier = deque([])
 	frontiernode = deque([])
-
+	#frontier.append(node)
 	frontier.append((node.x, node.y))
 	frontiernode.append(node)
 	
 	explored = {}
 	while 1:
 		if len(frontier) == 0:
-			return (None, cost, expansion_counter)
+			return None
 
 		node = frontier.popleft()
 		nodenode = frontiernode.popleft()
@@ -108,10 +104,10 @@ def bfs_search(mapname):
 			child.parent = nodenode
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:	
 				if (child.x == x_end and child.y == y_end):
-					return (child, cost, expansion_counter)
+					return child
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
-				#print "Adding: " + str(child.x) + ", " + str(child.y)
+				print "Adding: " + str(child.x) + ", " + str(child.y)
 
 		#if can move down, move down
 		if cur_y < down_bound and maze[cur_y + 1][0][cur_x]!= '%': 
@@ -119,10 +115,10 @@ def bfs_search(mapname):
 			child.parent = nodenode
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
 				if (child.x == x_end and child.y == y_end):
-					return (child, cost, expansion_counter)
+					return child
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
-				#print "Adding: " + str(child.x) + ", " + str(child.y)
+				print "Adding: " + str(child.x) + ", " + str(child.y)
 
 		#if can move up, move up
 		if cur_y > 0 and maze[cur_y - 1][0][cur_x]!= '%':
@@ -130,10 +126,10 @@ def bfs_search(mapname):
 			child.parent = nodenode
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
 				if (child.x == x_end and child.y == y_end):
-					return (child, cost, expansion_counter)
+					return child
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
-				#print "Adding: " + str(child.x) + ", " + str(child.y)
+				print "Adding: " + str(child.x) + ", " + str(child.y)
 
 		#if can move left, move left
 		if cur_x > 0 and maze[cur_y][0][cur_x-1]!= '%': 
@@ -141,101 +137,182 @@ def bfs_search(mapname):
 			child.parent = nodenode
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
 				if (child.x == x_end and child.y == y_end):
-					return (child, cost, expansion_counter)
+					return child
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
-				#print "Adding: " + str(child.x) + ", " + str(child.y)
-	return (None, cost, expansion_counter)
+				print "Adding: " + str(child.x) + ", " + str(child.y)
+	return None
 
-# This function conducts a dfs search of the maze. Returns pointer to 
-# last solution node and total step cost as a tuple (node, cost).
 def dfs_search(mapname):
 	maze = read_map(mapname)
 
-	cost = 0 
 	node = Node(x_start, y_start, None)
 	cur_x = x_start 
 	cur_y = y_start
 
 	if(cur_x == x_end and cur_y == y_end):
-		return (node, cost)
+		return node 
 
-	frontier = deque([]) #stack of (x, y) coordinates
-	frontiernode = deque([]) #stack of nodes
-	explored = {} #explored stack
+	frontier = deque([])
+	frontiernode = deque([])
+	explored = deque([])
 
-	frontier.append((node.x, node.y)) #add (x_start, y_start)
-	frontiernode.append(node) #add root node
+	frontier.append((node.x, node.y))
+	frontiernode.append(node)
 	
-	# note about deque: peek at leftmost item = deque[0]
-	# peek at rightmost item = deque[-1]
+
 	while len(frontier) > 0:
-		#print "Before popping, stack looks like: " + str(frontier)
-		print "Before popping, top of stack is: " + str(frontier[-1][0]) + ", " + str(frontier[-1][1])
 		nodenode = frontiernode.pop()
 		node = frontier.pop()
 		cur_x = node[0]
 		cur_y = node[1]
 
-		print "Looking at " +  str(cur_x) + ", " + str(cur_y) + " with action " + str(nodenode.action)
-
 		if (cur_x == x_end and cur_y == y_end):
-			return (nodenode, cost)
+			return nodenode
 
-		explored[(cur_x, cur_y)]= cur_x + cur_y
+		explored.append((cur_x, cur_y))
 
 		#expand node
 		if cur_x < right_bound and maze[cur_y][0][cur_x+1]!= '%': 
 			child = Node(cur_x + 1, cur_y, 0) 
 			child.parent = nodenode
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
-				print "APPENDING RIGHT: " + str(child.x) + ", " + str(child.y)
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
 
 		if cur_y < down_bound and maze[cur_y + 1][0][cur_x]!= '%':  
-			child = Node(cur_x, cur_y + 1, 1) 
+			child = Node(cur_x, cur_y+1, 0) 
 			child.parent = nodenode
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
-				print "APPENDING DOWN: " + str(child.x) + ", " + str(child.y)
-				frontier.append((child.x, child.y))
-				frontiernode.append(child)
-	
-		if cur_y > 0 and maze[cur_y-1][0][cur_x]!= '%': 
-			child = Node(cur_x, cur_y - 1, 2) 
-			child.parent = nodenode
-			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
-				print "APPENDING UP: " + str(child.x) + ", " + str(child.y)
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
 
-		if cur_x > 0 and maze[cur_y][0][cur_x-1]!= '%':  
-			child = Node(cur_x - 1, cur_y, 3) 
+		if cur_y > 0 and maze[cur_y - 1][0][cur_x]!= '%': 
+			child = Node(cur_x, cur_y - 1, 0) 
 			child.parent = nodenode
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
-				print "APPENDING LEFT: " + str(child.x) + ", " + str(child.y)
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
-	return (None, cost)
+
+		if cur_y > 0 and maze[cur_y][0][cur_x-1]!= '%':  
+			child = Node(cur_x - 1, cur_y, 0) 
+			child.parent = nodenode
+			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
+				frontier.append((child.x, child.y))
+				frontiernode.append(child)
 
 
 def aStar_search(mapname):
 	maze = read_map(mapname)
 
-	node = Node(x_start, y_start, None, None)
+	node = Node(x_start, y_start, None)
 
-	cur_x = x_start
-	cur_y = y_start
+	cur_x = node.x
+	cur_y = node.y
 
 	if(cur_x == x_end and cur_y == y_end):
 		return node 
+
+	frontier = []
+	frontierloc = deque([])
+	explored= {}
+	cost = 0
+
+	heapq.heappush(frontier, (cost, node))
+	
+	# ACCESS NODES
+	# hello = heapq.heappop(frontier)
+	# print hello[1].y
+
+	while len(frontier) > 0:
+
+		# print frontier
+		temp = heapq.heappop(frontier)
+		node = temp[1]
+		cur_x = node.x
+		cur_y = node.y
+		print node
+
+		cost+=1
+
+		explored[(node.x, node.y)] = node.x + node.y
+		
+		downcost = -1
+		upcost = -1
+		rightcost = -1
+		leftcost = -1
+
+		if cur_x < right_bound and maze[cur_y][0][cur_x + 1]!= '%': 
+			rightnode = Node(cur_x+1, cur_y, None)
+			rightnode.parent = node
+			# print "parent", rightnode.parent
+			rightcost = aStar_heuristic(cost, manhattan_dist(cur_x+1, x_end, cur_y, y_end))
+			if(rightnode.x, rightnode.y) not in explored and (rightnode.x, rightnode.y) not in frontierloc:
+				if rightnode.x == x_end and rightnode.y == y_end:
+					return (cost, rightnode)
+				print "ayy"
+				heapq.heappush(frontier, (rightcost, rightnode))
+				frontierloc.append((rightnode.x, rightnode.y))
+
+
+		if cur_y < down_bound and maze[cur_y + 1][0][cur_x]!= '%':
+			downnode = Node(cur_x, cur_y+1, None)
+			downnode.parent = node
+			downcost = aStar_heuristic(cost, manhattan_dist(cur_x, x_end, cur_y+1, y_end))
+			if(downnode.x, downnode.y) not in explored and (downnode.x, downnode.y) not in frontier:
+				if downnode.x == x_end and downnode.y == y_end:
+					return (cost, downnode)
+				print "hello"
+				heapq.heappush(frontier, (downcost, downnode))
+				frontierloc.append((downnode.x, downnode.y))
+
+
+		if cur_y > 0 and maze[cur_y - 1][0][cur_x]!= '%':
+			upnode = Node(cur_x, cur_y-1, None)
+			upnode.parent = node
+			upcost = aStar_heuristic(cost, manhattan_dist(cur_x, x_end, cur_y-1, y_end))
+			if(upnode.x, upnode.y) not in explored and (upnode.x, upnode.y) not in frontier:
+				if upnode.x == x_end and upnode.y == y_end:
+					return (cost, upnode)
+				print "myo"
+				heapq.heappush(frontier, (upcost, upnode))
+				frontierloc.append((upnode.x, upnode.y))
+		
+
+
+		if cur_x > 0 and maze[cur_y][0][cur_x-1]!= '%':
+			leftnode = Node(cur_x-1, cur_y, None)
+			leftnode.parent = node
+			downcost = aStar_heuristic(cost, manhattan_dist(cur_x-1, x_end, cur_y, y_end))
+			if(leftnode.x, leftnode.y) not in explored and (leftnode.x, leftnode.y) not in frontier:
+				if leftnode.x == x_end and leftnode.y == y_end:
+					return (cost, leftnode)
+				print "hay"
+				heapq.heappush(frontier, (leftcost, leftnode))
+				frontierloc.append((leftnode.x, leftnode.y))
+				
+
+
+		# s = set([rightcost, downcost, upcost, leftcost])
+		# # print s
+		# s.remove(-1)
+		# sorted(s)
+		# print s
+
+
+		# hello = heapq.heappop(frontier)
+		# print temp[1].x
+		# print frontier[0]
+
+	return None
+
+def aStar_heuristic(cost, dist):
+	return cost+dist
 
 def manhattan_dist(x1, x2, y1, y2):
 	dist = abs(x1 - x2) - (y1 - y2)
 	return dist
 
-# This function conducts a greedy best-first search of the maze. Returns pointer
-# to last solution node and total path cost as a tuple (node, cost). 
 def greedybfs_search(mapname):
 	maze = read_map(mapname)
 
@@ -255,6 +332,9 @@ def greedybfs_search(mapname):
 	heapq.heappush(frontier,(100000, node)) #here so we can compile
 
 	while len(frontier) > 1:
+		#node = heapq.heappop(frontier)
+		#print frontier
+		#print 'FRONTIER: ' + str(frontier)
 		temp = heapq.heappop(frontier)
 		node = temp[1]
 		cost += temp[0]
@@ -352,25 +432,27 @@ def main(mapname):
 	
 	solution = []
 
-	temp2 = dfs_search(mapname)
-	temp = temp2[0]
-	cost = temp2[1]
-	counter = temp2[2]
-
+	#temp2 = greedybfs(mapname)
+	temp = aStar_search(mapname)
+	print type(temp)
+	#temp = temp2[0]
+	#cost = temp2[1]
 	if temp != None: 
 		print 'SUCCESS!'
-		print 'End located at: (' + str(temp.x ) + ", " + str(temp.y)  + ")"
+		#print 'End located at: (' + str(temp.x ) + ", " + str(temp.y)  + ")"
+
+		#while(temp!= None):
+		#print 'path: ' + str(temp.x) + ", " + str(temp.y)
 
 		while(temp != None):
-			#print temp.x, temp.y
-			solution.append ((temp.x, temp.y))
-			temp = temp.parent
+			print temp[1].x, temp[1].y
+			solution.append ((temp[1].x, temp[1].y))
+			temp = temp[1].parent
 
 	#print solution
-	print "COST: " + str(cost)
-	print "NUMBER OF EXPANDED NODES: " + str(counter)
+	#print "COST:" + str(cost)
 	draw_solution(mapname, solution)
 	print "Solution drawn to " + mapname[:-4] + "test.txt"
 
 if __name__ == "__main__":
-	main("openMaze.txt")
+	main("mediumMaze.txt")
