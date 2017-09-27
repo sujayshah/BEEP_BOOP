@@ -95,6 +95,7 @@ def bfs_search(mapname):
 					return child
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
+				print "Adding: " + str(child.x) + ", " + str(child.y)
 
 		#if can move down, move down
 		if cur_y < down_bound and maze[cur_y + 1][0][cur_x]!= '%': 
@@ -105,6 +106,7 @@ def bfs_search(mapname):
 					return child
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
+				print "Adding: " + str(child.x) + ", " + str(child.y)
 
 		#if can move up, move up
 		if cur_y > 0 and maze[cur_y - 1][0][cur_x]!= '%':
@@ -115,6 +117,7 @@ def bfs_search(mapname):
 					return child
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
+				print "Adding: " + str(child.x) + ", " + str(child.y)
 
 		#if can move left, move left
 		if cur_y > 0 and maze[cur_y][0][cur_x-1]!= '%': 
@@ -125,6 +128,7 @@ def bfs_search(mapname):
 					return child
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
+				print "Adding: " + str(child.x) + ", " + str(child.y)
 	return None 
 
 # This function implements a depth-first search of the maze and prints the solution in text file.
@@ -157,7 +161,8 @@ def dfs_search(mapname):
 		#if can move right, move right
 		if cur_x < right_bound and maze[cur_y][0][cur_x+1]!= '%' and (cur_x+1, cur_y) not in explored: 
 			child = Node(cur_x + 1, cur_y, 0) 
-			child.parent = parentNode 	
+			child.parent = parentNode 
+			print "Parent is: " + str(parentNode.x) + ", " + str(parentNode.y)	
 		
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:	
 				#check if child is goal 
@@ -169,12 +174,14 @@ def dfs_search(mapname):
 				frontiernode.append(child)
 				cur_x = child.x
 				cur_y = child.y
+				parentNode = frontiernode.pop()
 
 		
 		#if can move down, move down
 		elif cur_y < down_bound and maze[cur_y + 1][0][cur_x]!= '%' and (cur_x, cur_y+1) not in explored: 
 			child = Node(cur_x, cur_y + 1, 1)
 			child.parent = parentNode
+			print "Parent is: " + str(parentNode.x) + ", " + str(parentNode.y)
 
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
 				if (child.x == x_end and child.y == y_end):
@@ -185,11 +192,13 @@ def dfs_search(mapname):
 				frontiernode.append(child)
 				cur_x = child.x
 				cur_y = child.y
+				parentNode = frontiernode.pop()
 
 		# #if can move up, move up
 		elif cur_y > 0 and maze[cur_y - 1][0][cur_x]!= '%' and (cur_x, cur_y-1) not in explored:
 			child = Node(cur_x, cur_y - 1, 2) 		
 			child.parent = parentNode 
+			print "Parent is: " + str(parentNode.x) + ", " + str(parentNode.y)
 			
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
 				if (child.x == x_end and child.y == y_end):
@@ -200,11 +209,13 @@ def dfs_search(mapname):
 				frontiernode.append(child)
 				cur_x = child.x
 				cur_y = child.y
+				parentNode = frontiernode.pop()
 			
 		#if can move left, move left
 		elif cur_x > 0 and maze[cur_y][0][cur_x-1]!= '%' and (cur_x-1, cur_y) not in explored: 
 			child = Node(cur_x - 1, cur_y, 3) 
 			child.parent = parentNode
+			print "Parent is: " + str(parentNode.x) + ", " + str(parentNode.y)
 		
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
 				if (child.x == x_end and child.y == y_end):
@@ -215,13 +226,13 @@ def dfs_search(mapname):
 				frontiernode.append(child)
 				cur_x = child.x
 				cur_y = child.y
+				parentNode = frontiernode.pop()
 
 		else:
 			curnode = frontier.pop()
 			cur_x = curnode[0]
 			cur_y = curnode[1]
 			print "Removing: " + str(cur_x) + ", " + str(cur_y)
-			parentNode = frontiernode.pop()
 
 	#return None
 	
