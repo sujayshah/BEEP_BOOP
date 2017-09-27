@@ -1,5 +1,6 @@
 from collections import deque
 from node import Node
+import heapq
 
 # global definition# 
 x_start = 0
@@ -141,7 +142,6 @@ def bfs_search(mapname):
 				frontiernode.append(child)
 				print "Adding: " + str(child.x) + ", " + str(child.y)
 	return None 
-
 	
 def aStar(mapname):
 	maze = read_map(mapname)
@@ -151,22 +151,76 @@ def greedybfs(mapname):
 
 	node = Node(x_start, y_start, None)
 	cur_x = node.x 
-	cury_ y = node.y
+	cur_y = node.y
 
-	frontier= dequeue([])
+	if(node.x == x_end and node.y == y_end):
+		return node
 
-	while()
+	frontier= []
+	frontierloc = deque([])
+	explored= {}
+
+	heapq.heappush(frontier, (0, node))
+	heapq.heappush(frontier,(1, node))
+
+	while len(frontier) > 1:
+		#node = heapq.heappop(frontier)
+		#print frontier
+		node= heapq.heappop(frontier)[1]
+
+		print 'Just popped: ' + str(node.x) + ", " + str(node.y)
+		explored[(node.x, node.y)] = node.x + node.y
+
+		if node.x == x_end and node.y == y_end:
+			return node
+
 		#right
-		if cur_x < right_bound and maze[cur_y][0][cur_x+1]!= '%':
+		if cur_x < right_bound and maze[cur_y][0][cur_x + 1]!= '%':
+			print 'Examining: ' + str(cur_x) + ", " + str(cur_y)
+			rightnode = Node(cur_x + 1, cur_y, 0)
+			rightnode.parent = node
+			rightcost = heuristic((cur_x + 1, cur_y), (x_end, y_end))
+
+			if(rightnode.x, rightnode.y) not in explored and (rightnode.x, rightnode.y) not in frontierloc:
+				heapq.heappush(frontier, (rightcost, rightnode))
+				frontierloc.append((rightnode.x, rightnode.y))
+				print 'Pushing: ' + str(rightnode.x) + ", " + str(rightnode.y)
 
 		#down
 		if cur_y < down_bound and maze[cur_y + 1][0][cur_x]!= '%':
+			print 'Examining: ' + str(cur_x) + ", " + str(cur_y)
+			downnode = Node(cur_x, cur_y + 1, 1)
+			downnode.parent = node
+			downcost = heuristic((cur_x, cur_y + 1), (x_end, y_end))
 
+			if(downnode.x, downnode.y) not in explored and (downnode.x, downnode.y) not in frontier:
+				heapq.heappush(frontier, (downcost, downnode))
+				frontierloc.append((downnode.x, downnode.y))
+				print 'Pushing: ' + str(downnode.x) + ", " + str(downnode.y)
 		#up
 		if cur_y > 0 and maze[cur_y - 1][0][cur_x]!= '%':
+			print 'Examining: ' + str(cur_x) + ", " + str(cur_y)
+			upnode = Node(cur_x, cur_y - 1, 2)
+			upnode.parent = node
+			upcost = heuristic((cur_x, cur_y - 1), (x_end, y_end))
+
+			if(upnode.x, upnode.y) not in explored and (upnode.x, upnode.y) not in frontier:
+				heapq.heappush(frontier, (upcost, upnode))
+				frontierloc.append((upnode.x, upnode.y))
+				print 'Pushing: ' + str(upnode.x) + ", " + str(upnode.y)
 
 		#left
-		if cur_y > 0 and maze[cur_y][0][cur_x-1]!= '%':
+		if cur_y > 0 and maze[cur_y][0][cur_x - 1]!= '%':
+			print 'Examining: ' + str(cur_x) + ", " + str(cur_y)
+			leftnode = Node(cur_x - 1, cur_y, 3)
+			leftnode.parent = node
+			leftcost = heuristic((cur_x - 1, cur_y), (x_end, y_end))
+
+			if(leftnode.x, leftnode.y) not in explored and (leftnode.x, leftnode.y) not in frontier:
+				heapq.heappush(frontier, (leftcost, leftnode))
+				frontierloc.append((leftnode.x, leftnode.y))
+				print 'Pushing: ' + str(leftnode.x) + ", " + str(leftnode.y)
+
 
 # This function draws the solution on the input maze. 		
 def draw_solution(mapname, solution_path):
@@ -197,7 +251,7 @@ def main(mapname):
 	
 	solution = []
 
-	temp = dfs_search(mapname)
+	temp = greedybfs(mapname)
 	if temp != None: 
 		print 'SUCCESS!'
 		print 'End located at: (' + str(temp.x ) + ", " + str(temp.y)  + ")"
@@ -215,4 +269,4 @@ def main(mapname):
 	print "Solution drawn to " + mapname[:-4] + "test.txt"
 
 if __name__ == "__main__":
-	main("mediumMaze.txt")
+	main("tinySearch.txt")
