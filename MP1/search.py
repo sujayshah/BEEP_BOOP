@@ -281,7 +281,7 @@ def aStar_search(mapname):
 			if(leftnode.x, leftnode.y) not in explored and (leftnode.x, leftnode.y) not in frontier:
 				if leftnode.x == x_end and leftnode.y == y_end:
 					return (cost, leftnode)
-				print "fuckthis"
+				print "fam"
 				heapq.heappush(frontier, (leftcost, leftnode))
 				frontierloc.append((leftnode.x, leftnode.y))
 
