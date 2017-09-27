@@ -153,9 +153,9 @@ def dfs_search(mapname):
 	if(cur_x == x_end and cur_y == y_end):
 		return node 
 
-	frontier = deque([])
-	frontiernode = deque([])
-	explored = deque([])
+	frontier = deque([]) #stack of (x, y) coordinates
+	frontiernode = deque([]) #stack of nodes
+	explored = deque([]) #explored stack
 
 	frontier.append((node.x, node.y))
 	frontiernode.append(node)
@@ -181,7 +181,7 @@ def dfs_search(mapname):
 				frontiernode.append(child)
 
 		if cur_y < down_bound and maze[cur_y + 1][0][cur_x]!= '%':  
-			child = Node(cur_x, cur_y+1, 0) 
+			child = Node(cur_x, cur_y + 1, 0) 
 			child.parent = nodenode
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
 				frontier.append((child.x, child.y))
@@ -194,7 +194,7 @@ def dfs_search(mapname):
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
 
-		if cur_y > 0 and maze[cur_y][0][cur_x-1]!= '%':  
+		if cur_x > 0 and maze[cur_y][0][cur_x-1]!= '%':  
 			child = Node(cur_x - 1, cur_y, 0) 
 			child.parent = nodenode
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
@@ -324,16 +324,13 @@ def main(mapname):
 	
 	solution = []
 
-	#temp2 = greedybfs(mapname)
-	temp = dfs(mapname)
+	#temp2 = greedybfs_search(mapname)
+	temp = dfs_search(mapname)
 	#temp = temp2[0]
 	#cost = temp2[1]
 	if temp != None: 
 		print 'SUCCESS!'
 		#print 'End located at: (' + str(temp.x ) + ", " + str(temp.y)  + ")"
-
-		#while(temp!= None):
-		#print 'path: ' + str(temp.x) + ", " + str(temp.y)
 
 		while(temp != None):
 			print temp.x, temp.y
@@ -346,4 +343,4 @@ def main(mapname):
 	print "Solution drawn to " + mapname[:-4] + "test.txt"
 
 if __name__ == "__main__":
-	main("mediumMaze.txt")
+	main("openMaze.txt")
