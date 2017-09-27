@@ -324,8 +324,9 @@ def main(mapname):
 	
 	solution = []
 
-	#temp2 = greedybfs_search(mapname)
 	temp = dfs_search(mapname)
+
+	#temp2 = greedybfs_search(mapname)
 	#temp = temp2[0]
 	#cost = temp2[1]
 	if temp != None: 
