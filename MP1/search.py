@@ -159,15 +159,18 @@ def greedybfs(mapname):
 	frontier= []
 	frontierloc = deque([])
 	explored= {}
+	cost = 0
 
 	heapq.heappush(frontier, (0, node))
-	heapq.heappush(frontier,(100, node))
+	heapq.heappush(frontier,(100000, node)) #here so we can compile
 
 	while len(frontier) > 1:
 		#node = heapq.heappop(frontier)
 		#print frontier
 		#print 'FRONTIER: ' + str(frontier)
-		node= heapq.heappop(frontier)[1]
+		temp = heapq.heappop(frontier)
+		node = temp[1]
+		cost += temp[0]
 		#print 'Just popped: ' + str(node.x) + ", " + str(node.y)
 		explored[(node.x, node.y)] = node.x + node.y
 
@@ -185,7 +188,7 @@ def greedybfs(mapname):
 
 			if(rightnode.x, rightnode.y) not in explored and (rightnode.x, rightnode.y) not in frontierloc:
 				if rightnode.x == x_end and rightnode.y == y_end:
-					return rightnode
+					return (rightnode, cost)
 				heapq.heappush(frontier, (rightcost, rightnode))
 				frontierloc.append((rightnode.x, rightnode.y))
 				#print 'Pushing: ' + str(rightnode.x) + ", " + str(rightnode.y)
@@ -199,7 +202,7 @@ def greedybfs(mapname):
 
 			if(downnode.x, downnode.y) not in explored and (downnode.x, downnode.y) not in frontier:
 				if downnode.x == x_end and downode.y == y_end:
-					return downnode
+					return (downnode, cost)
 				heapq.heappush(frontier, (downcost, downnode))
 				frontierloc.append((downnode.x, downnode.y))
 				#print 'Pushing: ' + str(downnode.x) + ", " + str(downnode.y)
@@ -212,7 +215,7 @@ def greedybfs(mapname):
 
 			if(upnode.x, upnode.y) not in explored and (upnode.x, upnode.y) not in frontier:
 				if upnode.x == x_end and upnode.y == y_end:
-					return upnode
+					return (upnode, cost)
 				heapq.heappush(frontier, (upcost, upnode))
 				frontierloc.append((upnode.x, upnode.y))
 				#print 'Pushing: ' + str(upnode.x) + ", " + str(upnode.y)
@@ -226,7 +229,7 @@ def greedybfs(mapname):
 
 			if(leftnode.x, leftnode.y) not in explored and (leftnode.x, leftnode.y) not in frontier:
 				if leftnode.x == x_end and leftnode.y == y_end:
-					return leftnode
+					return (leftnode, cost)
 				heapq.heappush(frontier, (leftcost, leftnode))
 				frontierloc.append((leftnode.x, leftnode.y))
 				#print 'Pushing: ' + str(leftnode.x) + ", " + str(leftnode.y)
@@ -262,7 +265,9 @@ def main(mapname):
 	
 	solution = []
 
-	temp = greedybfs(mapname)
+	temp2 = greedybfs(mapname)
+	temp = temp2[0]
+	cost = temp2[1]
 	if temp != None: 
 		print 'SUCCESS!'
 		print 'End located at: (' + str(temp.x ) + ", " + str(temp.y)  + ")"
@@ -276,8 +281,9 @@ def main(mapname):
 			temp = temp.parent
 
 	#print solution
+	print "COST:" + str(cost)
 	draw_solution(mapname, solution)
 	print "Solution drawn to " + mapname[:-4] + "test.txt"
 
 if __name__ == "__main__":
-	main("mediumMaze.txt")
+	main("tinySearch.txt")
