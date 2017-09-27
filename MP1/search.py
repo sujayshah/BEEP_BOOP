@@ -74,7 +74,7 @@ def bfs_search(mapname):
 	maze = read_map(mapname)
 
 	cost = 0 
-	expansion _counter = 0
+	expansion_counter = 0
 
 	node = Node(x_start, y_start, None)
 	cur_x = x_start
@@ -306,8 +306,7 @@ def aStar_search(mapname):
 				print "hay"
 				heapq.heappush(frontier, (leftcost, leftnode))
 				frontierloc.append((leftnode.x, leftnode.y))
-				
-
+			
 
 		# s = set([rightcost, downcost, upcost, leftcost])
 		# # print s
@@ -456,7 +455,11 @@ def main(mapname):
 	#temp = temp2[0]
 	#cost = temp2[1]
 	#counter = temp2[2]
-	temp2 
+	temp2 = aStar_search(mapname)
+	print type(temp2[0])
+	print type(temp2[1])
+
+	temp = temp2[1]
 
 	if temp != None: 
 		print 'SUCCESS!'
@@ -468,8 +471,8 @@ def main(mapname):
 			temp = temp.parent
 
 	#print solution
-	print "COST: " + str(cost)
-	print "NUMBER OF EXPANDED NODES: " + str(counter)
+	#print "COST: " + str(cost)
+	#print "NUMBER OF EXPANDED NODES: " + str(counter)
 	draw_solution(mapname, solution)
 	print "Solution drawn to " + mapname[:-4] + "test.txt"
 
