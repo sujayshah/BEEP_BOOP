@@ -205,6 +205,25 @@ def dfs_search(mapname):
 def aStar_search(mapname):
 	maze = read_map(mapname)
 
+	node = Node(x_start, y_start, None, None)
+
+	cur_x = x_start
+	cur_y = y_start
+
+	if(cur_x == x_end and cur_y == y_end):
+		return node 
+
+
+
+
+
+
+
+
+def manhattan_dist(x1, x2, y1, y2):
+	dist = abs(x1 - x2) - (y1 - y2)
+	return dist
+
 def greedybfs_search(mapname):
 	maze = read_map(mapname)
 
@@ -325,7 +344,7 @@ def main(mapname):
 	solution = []
 
 	#temp2 = greedybfs(mapname)
-	temp = dfs(mapname)
+	temp = dfs_search(mapname)
 	#temp = temp2[0]
 	#cost = temp2[1]
 	if temp != None: 
