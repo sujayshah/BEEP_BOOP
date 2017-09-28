@@ -236,9 +236,6 @@ def aStar_search(mapname):
 
 	heapq.heappush(frontier, (cost, node))
 	
-	# ACCESS NODES
-	# hello = heapq.heappop(frontier)
-	# print hello[1].y
 
 	while len(frontier) > 0:
 
@@ -247,7 +244,7 @@ def aStar_search(mapname):
 		node = temp[1]
 		cur_x = node.x
 		cur_y = node.y
-		print node
+		#print node
 
 		cost+=1
 
@@ -261,12 +258,11 @@ def aStar_search(mapname):
 		if cur_x < right_bound and maze[cur_y][0][cur_x + 1]!= '%': 
 			rightnode = Node(cur_x+1, cur_y, None)
 			rightnode.parent = node
-			# print "parent", rightnode.parent
 			rightcost = aStar_heuristic(cost, manhattan_dist(cur_x+1, x_end, cur_y, y_end))
+
 			if(rightnode.x, rightnode.y) not in explored and (rightnode.x, rightnode.y) not in frontierloc:
 				if rightnode.x == x_end and rightnode.y == y_end:
-					return (cost, rightnode)
-				print "ayy"
+					return (rightnode, cost)
 				heapq.heappush(frontier, (rightcost, rightnode))
 				frontierloc.append((rightnode.x, rightnode.y))
 
@@ -275,10 +271,10 @@ def aStar_search(mapname):
 			downnode = Node(cur_x, cur_y+1, None)
 			downnode.parent = node
 			downcost = aStar_heuristic(cost, manhattan_dist(cur_x, x_end, cur_y+1, y_end))
+
 			if(downnode.x, downnode.y) not in explored and (downnode.x, downnode.y) not in frontier:
 				if downnode.x == x_end and downnode.y == y_end:
-					return (cost, downnode)
-				print "hello"
+					return (downnode, cost)
 				heapq.heappush(frontier, (downcost, downnode))
 				frontierloc.append((downnode.x, downnode.y))
 
@@ -287,10 +283,10 @@ def aStar_search(mapname):
 			upnode = Node(cur_x, cur_y-1, None)
 			upnode.parent = node
 			upcost = aStar_heuristic(cost, manhattan_dist(cur_x, x_end, cur_y-1, y_end))
+
 			if(upnode.x, upnode.y) not in explored and (upnode.x, upnode.y) not in frontier:
 				if upnode.x == x_end and upnode.y == y_end:
-					return (cost, upnode)
-				print "myo"
+					return (upnode, cost)
 				heapq.heappush(frontier, (upcost, upnode))
 				frontierloc.append((upnode.x, upnode.y))
 		
@@ -300,34 +296,17 @@ def aStar_search(mapname):
 			leftnode = Node(cur_x-1, cur_y, None)
 			leftnode.parent = node
 			downcost = aStar_heuristic(cost, manhattan_dist(cur_x-1, x_end, cur_y, y_end))
+
 			if(leftnode.x, leftnode.y) not in explored and (leftnode.x, leftnode.y) not in frontier:
 				if leftnode.x == x_end and leftnode.y == y_end:
-					return (cost, leftnode)
-				print "hay"
+					return (lefnode, cost)
 				heapq.heappush(frontier, (leftcost, leftnode))
 				frontierloc.append((leftnode.x, leftnode.y))
-			
-
-		# s = set([rightcost, downcost, upcost, leftcost])
-		# # print s
-		# s.remove(-1)
-		# sorted(s)
-		# print s
-
-
-		# hello = heapq.heappop(frontier)
-		# print temp[1].x
-		# print frontier[0]
 
 	return None
 
 def aStar_heuristic(cost, dist):
 	return cost+dist
-
-def manhattan_dist(x1, x2, y1, y2):
-	dist = abs(x1 - x2) - (y1 - y2)
-	return dist
-
 
 def manhattan_dist(x1, x2, y1, y2):
 	dist = abs(x1 - x2) - (y1 - y2)
@@ -459,7 +438,7 @@ def main(mapname):
 	print type(temp2[0])
 	print type(temp2[1])
 
-	temp = temp2[1]
+	temp = temp2[0]
 
 	if temp != None: 
 		print 'SUCCESS!'
