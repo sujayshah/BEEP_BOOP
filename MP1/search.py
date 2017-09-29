@@ -35,7 +35,7 @@ def write_test_map(mapname):
 
 # This function finds the (x,y) start position of the maze, marked as 
 # 'P' in the text file. It also finds the (x,y) finish position of the maze,
-# marked as '.'
+# marked as '.' Returns a list of '.''
 def find_start_end(mapname):
 	maze = read_map(mapname)
 	global x_start 
@@ -44,6 +44,7 @@ def find_start_end(mapname):
 	global y_end
 	global right_bound
 	global down_bound
+	fruit = []
 
 	for ypos, line in enumerate(maze):
 		for string in line:
@@ -54,8 +55,10 @@ def find_start_end(mapname):
 				if char == '.':
 					x_end = xpos 
 					y_end = ypos
+					fruit.append((xpos, ypos))
 			right_bound = xpos
-		down_bound = ypos				
+		down_bound = ypos
+	return fruit					
 
 def heuristic(point1, point2):
 	x1 = point1[0]
@@ -153,12 +156,14 @@ def dfs_search(mapname):
 	maze = read_map(mapname)
 
 	cost = 0 
+	expansion_counter = 0 
+
 	node = Node(x_start, y_start, None)
 	cur_x = x_start 
 	cur_y = y_start
 
 	if(cur_x == x_end and cur_y == y_end):
-		return (node, cost)
+		return (node, cost, expansion_counter)
 
 	frontier = deque([]) #stack of (x, y) coordinates
 	frontiernode = deque([]) #stack of nodes
@@ -171,16 +176,16 @@ def dfs_search(mapname):
 	# peek at rightmost item = deque[-1]
 	while len(frontier) > 0:
 		#print "Before popping, stack looks like: " + str(frontier)
-		print "Before popping, top of stack is: " + str(frontier[-1][0]) + ", " + str(frontier[-1][1])
+		#print "Before popping, top of stack is: " + str(frontier[-1][0]) + ", " + str(frontier[-1][1])
 		nodenode = frontiernode.pop()
 		node = frontier.pop()
 		cur_x = node[0]
 		cur_y = node[1]
 
-		print "Looking at " +  str(cur_x) + ", " + str(cur_y) + " with action " + str(nodenode.action)
+		#print "Looking at " +  str(cur_x) + ", " + str(cur_y) + " with action " + str(nodenode.action)
 
 		if (cur_x == x_end and cur_y == y_end):
-			return (nodenode, cost)
+			return (nodenode, cost, expansion_counter)
 
 		explored[(cur_x, cur_y)]= cur_x + cur_y
 
@@ -189,7 +194,7 @@ def dfs_search(mapname):
 			child = Node(cur_x + 1, cur_y, 0) 
 			child.parent = nodenode
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
-				print "APPENDING RIGHT: " + str(child.x) + ", " + str(child.y)
+				#print "APPENDING RIGHT: " + str(child.x) + ", " + str(child.y)
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
 
@@ -197,7 +202,7 @@ def dfs_search(mapname):
 			child = Node(cur_x, cur_y + 1, 1) 
 			child.parent = nodenode
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
-				print "APPENDING DOWN: " + str(child.x) + ", " + str(child.y)
+				#print "APPENDING DOWN: " + str(child.x) + ", " + str(child.y)
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
 	
@@ -205,7 +210,7 @@ def dfs_search(mapname):
 			child = Node(cur_x, cur_y - 1, 2) 
 			child.parent = nodenode
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
-				print "APPENDING UP: " + str(child.x) + ", " + str(child.y)
+				#print "APPENDING UP: " + str(child.x) + ", " + str(child.y)
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
 
@@ -213,7 +218,7 @@ def dfs_search(mapname):
 			child = Node(cur_x - 1, cur_y, 3) 
 			child.parent = nodenode
 			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
-				print "APPENDING LEFT: " + str(child.x) + ", " + str(child.y)
+				#print "APPENDING LEFT: " + str(child.x) + ", " + str(child.y)
 				frontier.append((child.x, child.y))
 				frontiernode.append(child)
 	return (None, cost)
@@ -423,7 +428,8 @@ def main(mapname):
 		for s in line: 
 			print s
 
-	find_start_end(mapname)
+	fruit = []
+	fruit = find_start_end(mapname)
 	print "START COORDINATES: (" + str(x_start) + ", " + str(y_start) + ")"
 	print "DIMENSIONS: " + str(right_bound) + " by " + str(down_bound)
 	print "END COORDINATES: (" + str(x_end) + ", " + str(y_end) + ")"
@@ -434,9 +440,7 @@ def main(mapname):
 	#temp = temp2[0]
 	#cost = temp2[1]
 	#counter = temp2[2]
-	temp2 = aStar_search(mapname)
-	print type(temp2[0])
-	print type(temp2[1])
+	temp2 = dfs_search(mapname)
 
 	temp = temp2[0]
 
@@ -452,6 +456,7 @@ def main(mapname):
 	#print solution
 	#print "COST: " + str(cost)
 	#print "NUMBER OF EXPANDED NODES: " + str(counter)
+	print "Fruit:" + str(fruit)
 	draw_solution(mapname, solution)
 	print "Solution drawn to " + mapname[:-4] + "test.txt"
 
