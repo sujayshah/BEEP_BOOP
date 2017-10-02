@@ -323,8 +323,10 @@ def closest_real_dist_heuristic(mapname, fruitList):
 	node = Node(x_start, y_start, None)
 	cur_x = node.x
 	cur_y = node.y
+	nextNode = None
 	
 	while len(fruitList) != 0:
+		cost = 0
 		for x in range(len(fruitList)):
 			food_x = fruitList[x][0]
 			food_y = fruitList[x][1]
@@ -476,17 +478,18 @@ def main(mapname):
 	fruitList = fruit
 	temp2 = closest_real_dist_heuristic(mapname, fruitList)
 	print "Actual End", temp2[0].x, temp2[0].y, temp2[1]
+	print "Parent", temp2[0].parent.x, temp2[0].parent.y
 
-	# temp = temp2[0]
+	temp = temp2[0]
 
-	# if temp != None: 
-	# 	print 'SUCCESS!'
-	# 	print 'End located at: (' + str(temp.x ) + ", " + str(temp.y)  + ")"
+	if temp != None: 
+		print 'SUCCESS!'
+		print 'End located at: (' + str(temp.x ) + ", " + str(temp.y)  + ")"
 
-	# 	while(temp != None):
-	# 		#print temp.x, temp.y
-	# 		solution.append ((temp.x, temp.y))
-	# 		temp = temp.parent
+		while(temp != None):
+			#print temp.x, temp.y
+			solution.append ((temp.x, temp.y))
+			temp = temp.parent
 
 	#print solution
 	#print "COST: " + str(cost)
