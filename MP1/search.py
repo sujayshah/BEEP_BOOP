@@ -1,6 +1,7 @@
 from collections import deque
 from node import Node
 import heapq
+import string as stringz
 
 # global definition# 
 x_start = 0
@@ -332,6 +333,7 @@ def closest_real_dist_heuristic(mapname, fruitList):
 	cur_y = node.y
 	nextNode = None
 	
+	order_fruit = []
 	while len(fruitList) != 0:
 		cost = 0
 		for x in range(len(fruitList)):
@@ -352,8 +354,10 @@ def closest_real_dist_heuristic(mapname, fruitList):
 		if (nextNode.x, nextNode.y) in fruitList:
 			print nextNode.x, nextNode.y
 			fruitList.remove((nextNode.x, nextNode.y)) 
+			order_fruit.append((nextNode.x, nextNode.y))
+			#maze[nextNode.y][0][nextNode.x] = 'A' # temporarily mark the fruit
 
-	return returnFruitCost
+	return order_fruit
 
 
 # This function conducts a greedy best-first search of the maze. Returns pointer
@@ -447,14 +451,17 @@ def greedybfs_search(mapname):
 # This function draws the solution on the input maze. 		
 def draw_solution(mapname, solution_path):
 	maze = read_map(mapname)
-	writemap = mapname[:-4] + "test.txt"
+	writemap = mapname[:-4] + "test.txt" 
 
 	with open(writemap, 'w') as outFile:
-		for ypos, line in enumerate(maze):
+		for ypos, line in enumerate(maze): 
 			for string in line:
 				for xpos, char in enumerate(string):
 					if (xpos, ypos) in solution_path and (xpos, ypos)!= (x_start, y_start): 
-						outFile.write('.')
+						#print (xpos, ypos)
+						#print solution_path.index((xpos,ypos))
+						#return
+						outFile.write(stringz.printable[solution_path.index((xpos, ypos))])
 				 	else:
 						outFile.write(char)
 			outFile.write('\n')
@@ -484,25 +491,13 @@ def main(mapname):
 
 	fruitList = fruit
 	temp2 = closest_real_dist_heuristic(mapname, fruitList)
-	print "Actual End", temp2[0].x, temp2[0].y, temp2[1]
-	print "Parent", temp2[0].parent.x, temp2[0].parent.y
-
-	temp = temp2[0]
-
-	if temp != None: 
-		print 'SUCCESS!'
-		print 'End located at: (' + str(temp.x ) + ", " + str(temp.y)  + ")"
-
-		while(temp != None):
-			#print temp.x, temp.y
-			solution.append ((temp.x, temp.y))
-			temp = temp.parent
+	
 
 	#print solution
 	#print "COST: " + str(cost)
 	#print "NUMBER OF EXPANDED NODES: " + str(counter)
 	print "Fruit:" + str(fruit)
-	draw_solution(mapname, solution)
+	draw_solution(mapname, temp2)
 	print "Solution drawn to " + mapname[:-4] + "test.txt"
 
 if __name__ == "__main__":
