@@ -73,18 +73,23 @@ def heuristic(point1, point2):
 
 # This function conducts a BFS search of the maze. Returns pointer to 
 # last solution node and total step cost as a tuple (node, cost).
-def bfs_search(mapname): 
+def bfs_search(mapname, infruit): 
 	maze = read_map(mapname)
 
 	cost = 0 
 	expansion_counter = 0
+	fruit = infruit
 
-	node = Node(x_start, y_start, None)
+	node = Node(x_start, y_start, fruit)
 	cur_x = x_start
 	cur_y = y_start
 
-	if(node.x == x_end and node.y == y_end):
+	#if(node.x == x_end and node.y == y_end):
+	#	return (node, cost)
+	if(not node.state):
+		print "No more fruit left"
 		return (node, cost)
+
 	
 	frontier = deque([])
 	frontiernode = deque([])
@@ -105,7 +110,9 @@ def bfs_search(mapname):
 
 		explored[(cur_x, cur_y)]= cur_x + cur_y
 
-		#if can move right, move right
+		# if can move right, move right
+		# state should be represented by tuple: (position, fruit left)
+		# goal check should be if fruit list is empty 
 		if cur_x < right_bound and maze[cur_y][0][cur_x+1]!= '%': 
 			child = Node(cur_x + 1, cur_y, 0) #initialize child node
 			child.parent = nodenode
@@ -440,7 +447,7 @@ def main(mapname):
 	#temp = temp2[0]
 	#cost = temp2[1]
 	#counter = temp2[2]
-	temp2 = dfs_search(mapname)
+	temp2 = bfs_search(mapname, fruit)
 
 	temp = temp2[0]
 
@@ -461,4 +468,4 @@ def main(mapname):
 	print "Solution drawn to " + mapname[:-4] + "test.txt"
 
 if __name__ == "__main__":
-	main("openMaze.txt")
+	main("tinySearch.txt")
