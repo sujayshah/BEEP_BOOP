@@ -1,6 +1,6 @@
 # BEEP_BOOP
 
-This consists of AI problems to be solved.
+This consists of problems to be solved.
 
 ///////////////////////////////////////////
 
