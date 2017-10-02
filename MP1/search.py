@@ -230,13 +230,15 @@ def dfs_search(mapname):
 				frontiernode.append(child)
 	return (None, cost)
 
-def aStar_search(mapname):
+def aStar_search(mapname, startNode, endNode):
 	maze = read_map(mapname)
 
-	node = Node(x_start, y_start, None)
+	node = startNode
+	cur_x = startNode.x
+	cur_y = startNode.y
 
-	cur_x = node.x
-	cur_y = node.y
+	x_end = endNode.x
+	y_end = endNode.y
 
 	if(cur_x == x_end and cur_y == y_end):
 		return node 
@@ -311,7 +313,7 @@ def aStar_search(mapname):
 
 			if(leftnode.x, leftnode.y) not in explored and (leftnode.x, leftnode.y) not in frontier:
 				if leftnode.x == x_end and leftnode.y == y_end:
-					return (lefnode, cost)
+					return (leftnode, cost)
 				heapq.heappush(frontier, (leftcost, leftnode))
 				frontierloc.append((leftnode.x, leftnode.y))
 
@@ -323,6 +325,36 @@ def aStar_heuristic(cost, dist):
 def manhattan_dist(x1, x2, y1, y2):
 	dist = abs(x1 - x2) - (y1 - y2)
 	return dist
+
+def closest_real_dist_heuristic(mapname, fruitList):
+	node = Node(x_start, y_start, None)
+	cur_x = node.x
+	cur_y = node.y
+	nextNode = None
+	
+	while len(fruitList) != 0:
+		cost = 0
+		for x in range(len(fruitList)):
+			food_x = fruitList[x][0]
+			food_y = fruitList[x][1]
+			fruitNode = Node(food_x, food_y, None) 
+			returnFruitCost = aStar_search(mapname, node, fruitNode)
+			if returnFruitCost != None: 
+				if x == 0 or returnFruitCost[1] < cost:
+					cost = returnFruitCost[1]
+					nextNode = returnFruitCost[0]
+					# print nextNode.x, nextNode.y, cost
+			else:
+				return None
+			
+			cur_x = food_x
+			cur_y = food_y
+		if (nextNode.x, nextNode.y) in fruitList:
+			print nextNode.x, nextNode.y
+			fruitList.remove((nextNode.x, nextNode.y)) 
+
+	return returnFruitCost
+
 
 # This function conducts a greedy best-first search of the maze. Returns pointer
 # to last solution node and total path cost as a tuple (node, cost). 
@@ -447,7 +479,13 @@ def main(mapname):
 	#temp = temp2[0]
 	#cost = temp2[1]
 	#counter = temp2[2]
-	temp2 = bfs_search(mapname, fruit)
+	
+	# temp2 = aStar_search(mapname)
+
+	fruitList = fruit
+	temp2 = closest_real_dist_heuristic(mapname, fruitList)
+	print "Actual End", temp2[0].x, temp2[0].y, temp2[1]
+	print "Parent", temp2[0].parent.x, temp2[0].parent.y
 
 	temp = temp2[0]
 
@@ -468,4 +506,5 @@ def main(mapname):
 	print "Solution drawn to " + mapname[:-4] + "test.txt"
 
 if __name__ == "__main__":
-	main("tinySearch.txt")
+
+	main("mediumSearch.txt")
