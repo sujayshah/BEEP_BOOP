@@ -323,26 +323,15 @@ def manhattan_dist(x1, x2, y1, y2):
 	return dist
 
 def closest_real_dist_heuristic(mapname, fruitList):
+
+	maze = read_map(mapname)
+
 	node = Node(x_start, y_start, None)
 	cur_x = node.x
 	cur_y = node.y
-	nextNode = None
 	
-	while len(fruitList) != 0:
-		
-
-
-		maze = read_map(mapname)
-
-	node = startNode
-	cur_x = startNode.x
-	cur_y = startNode.y
-
-	x_end = endNode.x
-	y_end = endNode.y
-
-	if(cur_x == x_end and cur_y == y_end):
-		return node 
+	if len(fruitList) == 0:
+		return None
 
 	frontier = []
 	frontierloc = deque([])
@@ -350,19 +339,16 @@ def closest_real_dist_heuristic(mapname, fruitList):
 	cost = 0
 
 	heapq.heappush(frontier, (cost, node))
-	
 
-	while len(frontier) > 0:
-
+	while len(fruitList) != 0:
+		
 		# print frontier
 		temp = heapq.heappop(frontier)
 		node = temp[1]
 		cur_x = node.x
 		cur_y = node.y
-		#print node
 
-		cost = temp[0] + 1
-		print "COST", cost
+		cost += 1
 
 		explored[(node.x, node.y)] = node.x + node.y
 		
@@ -377,8 +363,9 @@ def closest_real_dist_heuristic(mapname, fruitList):
 			rightcost = aStar_heuristic(cost, manhattan_dist(cur_x+1, x_end, cur_y, y_end))
 
 			if(rightnode.x, rightnode.y) not in explored and (rightnode.x, rightnode.y) not in frontierloc:
-				if rightnode.x == x_end and rightnode.y == y_end:
-					return (rightnode, cost)
+				if (rightnode.x, rightnode.y) in fruitList:
+					print rightnode.x, rightnode.y
+					fruitList.remove((rightnode.x, rightnode.y))
 				heapq.heappush(frontier, (rightcost, rightnode))
 				frontierloc.append((rightnode.x, rightnode.y))
 
@@ -388,9 +375,10 @@ def closest_real_dist_heuristic(mapname, fruitList):
 			downnode.parent = node
 			downcost = aStar_heuristic(cost, manhattan_dist(cur_x, x_end, cur_y+1, y_end))
 
-			if(downnode.x, downnode.y) not in explored and (downnode.x, downnode.y) not in frontier:
-				if downnode.x == x_end and downnode.y == y_end:
-					return (downnode, cost)
+			if(downnode.x, downnode.y) not in explored and (downnode.x, downnode.y) not in frontierloc:
+				if (downnode.x, downnode.y) in fruitList:
+					print downnode.x, downnode.y
+					fruitList.remove((downnode.x, downnode.y))
 				heapq.heappush(frontier, (downcost, downnode))
 				frontierloc.append((downnode.x, downnode.y))
 
@@ -400,9 +388,10 @@ def closest_real_dist_heuristic(mapname, fruitList):
 			upnode.parent = node
 			upcost = aStar_heuristic(cost, manhattan_dist(cur_x, x_end, cur_y-1, y_end))
 
-			if(upnode.x, upnode.y) not in explored and (upnode.x, upnode.y) not in frontier:
-				if upnode.x == x_end and upnode.y == y_end:
-					return (upnode, cost)
+			if(upnode.x, upnode.y) not in explored and (upnode.x, upnode.y) not in frontierloc:
+				if (upnode.x, upnode.y) in fruitList:
+					print upnode.x, upnode.y
+					fruitList.remove((upnode.x, upnode.y))
 				heapq.heappush(frontier, (upcost, upnode))
 				frontierloc.append((upnode.x, upnode.y))
 		
@@ -413,9 +402,10 @@ def closest_real_dist_heuristic(mapname, fruitList):
 			leftnode.parent = node
 			leftcost = aStar_heuristic(cost, manhattan_dist(cur_x-1, x_end, cur_y, y_end))
 
-			if(leftnode.x, leftnode.y) not in explored and (leftnode.x, leftnode.y) not in frontier:
-				if leftnode.x == x_end and leftnode.y == y_end:
-					return (leftnode, cost)
+			if(leftnode.x, leftnode.y) not in explored and (leftnode.x, leftnode.y) not in frontierloc:
+				if (leftnode.x, leftnode.y) in fruitList:
+					print leftnode.x, leftnode.y
+					fruitList.remove((leftnode.x, leftnode.y))
 				heapq.heappush(frontier, (leftcost, leftnode))
 				frontierloc.append((leftnode.x, leftnode.y))
 
@@ -546,25 +536,25 @@ def main(mapname):
 	#cost = temp2[1]
 	#counter = temp2[2]
 	
-	temp2 = greedybfs_search(mapname)
-
 	fruitList = fruit
+	closest_real_dist_heuristic(mapname, fruitList)
+
 	# temp2 = closest_real_dist_heuristic(mapname, fruitList)
-	print "Actual End", temp2[0].x, temp2[0].y, temp2[1]
-	print "Parent", temp2[0].parent.x, temp2[0].parent.y
+	# print "Actual End", temp2[0].x, temp2[0].y, temp2[1]
+	# print "Parent", temp2[0].parent.x, temp2[0].parent.y
 
-	temp = temp2[0]
+	# temp = temp2[0]
 
-	if temp != None: 
-		print 'SUCCESS!'
-		print 'End located at: (' + str(temp.x ) + ", " + str(temp.y)  + ")"
+	# if temp != None: 
+	# 	print 'SUCCESS!'
+	# 	print 'End located at: (' + str(temp.x ) + ", " + str(temp.y)  + ")"
 
-		while(temp != None):
-			#print temp.x, temp.y
-			solution.append ((temp.x, temp.y))
-			temp = temp.parent
-			# print temp.x, temp.y
-		# print solution[::-1]
+	# 	while(temp != None):
+	# 		#print temp.x, temp.y
+	# 		solution.append ((temp.x, temp.y))
+	# 		temp = temp.parent
+	# 		# print temp.x, temp.y
+	# 	# print solution[::-1]
 
 	#print solution
 	#print "COST: " + str(cost)
@@ -574,4 +564,4 @@ def main(mapname):
 	print "Solution drawn to " + mapname[:-4] + "test.txt"
 
 if __name__ == "__main__":
-	main("openMaze.txt")
+	main("smallSearch.txt")
