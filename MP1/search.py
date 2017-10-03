@@ -330,8 +330,6 @@ def closest_real_dist_heuristic(mapname, fruitList):
 	nextNode = None
 	
 	while len(fruitList) != 0:
-		
-
 
 		maze = read_map(mapname)
 
