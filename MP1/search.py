@@ -280,7 +280,10 @@ def aStar_search(mapname):
 			downcost = aStar_heuristic(cost, manhattan_dist(cur_x, x_end, cur_y+1, y_end))
 
 			if(downnode.x, downnode.y) not in explored and (downnode.x, downnode.y) not in frontierloc:
+<<<<<<< HEAD
+=======
 				print "DOWN"
+>>>>>>> 9578daa2c52dba67f867f393233dc5e00aca184a
 				if downnode.x == x_end and downnode.y == y_end:
 					return (downnode, cost)
 				heapq.heappush(frontier, (downcost, downnode))
@@ -293,7 +296,6 @@ def aStar_search(mapname):
 			upcost = aStar_heuristic(cost, manhattan_dist(cur_x, x_end, cur_y-1, y_end))
 
 			if(upnode.x, upnode.y) not in explored and (upnode.x, upnode.y) not in frontierloc:
-				print "UP"
 				if upnode.x == x_end and upnode.y == y_end:
 					return (upnode, cost)
 				heapq.heappush(frontier, (upcost, upnode))
@@ -307,7 +309,6 @@ def aStar_search(mapname):
 			leftcost = aStar_heuristic(cost, manhattan_dist(cur_x-1, x_end, cur_y, y_end))
 
 			if(leftnode.x, leftnode.y) not in explored and (leftnode.x, leftnode.y) not in frontierloc:
-				print "LEFT"
 				if leftnode.x == x_end and leftnode.y == y_end:
 					return (leftnode, cost)
 				heapq.heappush(frontier, (leftcost, leftnode))
