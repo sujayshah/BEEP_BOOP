@@ -287,7 +287,7 @@ def aStar_search(mapname, startNode, endNode):
 			downnode.parent = node
 			downcost = aStar_heuristic(cost, manhattan_dist(cur_x, x_end, cur_y+1, y_end))
 
-			if(downnode.x, downnode.y) not in explored and (downnode.x, downnode.y) not in frontier:
+			if(downnode.x, downnode.y) not in explored and (downnode.x, downnode.y) not in frontierloc:
 				if downnode.x == x_end and downnode.y == y_end:
 					return (downnode, cost)
 				heapq.heappush(frontier, (downcost, downnode))
@@ -299,7 +299,7 @@ def aStar_search(mapname, startNode, endNode):
 			upnode.parent = node
 			upcost = aStar_heuristic(cost, manhattan_dist(cur_x, x_end, cur_y-1, y_end))
 
-			if(upnode.x, upnode.y) not in explored and (upnode.x, upnode.y) not in frontier:
+			if(upnode.x, upnode.y) not in explored and (upnode.x, upnode.y) not in frontierloc:
 				if upnode.x == x_end and upnode.y == y_end:
 					return (upnode, cost)
 				heapq.heappush(frontier, (upcost, upnode))
@@ -312,7 +312,7 @@ def aStar_search(mapname, startNode, endNode):
 			leftnode.parent = node
 			downcost = aStar_heuristic(cost, manhattan_dist(cur_x-1, x_end, cur_y, y_end))
 
-			if(leftnode.x, leftnode.y) not in explored and (leftnode.x, leftnode.y) not in frontier:
+			if(leftnode.x, leftnode.y) not in explored and (leftnode.x, leftnode.y) not in frontierloc:
 				if leftnode.x == x_end and leftnode.y == y_end:
 					return (leftnode, cost)
 				heapq.heappush(frontier, (leftcost, leftnode))
@@ -413,7 +413,7 @@ def greedybfs_search(mapname):
 			downnode.parent = node
 			downcost = heuristic((cur_x, cur_y + 1), (x_end, y_end))
 
-			if(downnode.x, downnode.y) not in explored and (downnode.x, downnode.y) not in frontier:
+			if(downnode.x, downnode.y) not in explored and (downnode.x, downnode.y) not in frontierloc:
 				if downnode.x == x_end and downode.y == y_end:
 					return (downnode, cost)
 				heapq.heappush(frontier, (downcost, downnode))
@@ -426,7 +426,7 @@ def greedybfs_search(mapname):
 			upnode.parent = node
 			upcost = heuristic((cur_x, cur_y - 1), (x_end, y_end))
 
-			if(upnode.x, upnode.y) not in explored and (upnode.x, upnode.y) not in frontier:
+			if(upnode.x, upnode.y) not in explored and (upnode.x, upnode.y) not in frontierloc:
 				if upnode.x == x_end and upnode.y == y_end:
 					return (upnode, cost)
 				heapq.heappush(frontier, (upcost, upnode))
@@ -440,7 +440,7 @@ def greedybfs_search(mapname):
 			leftnode.parent = node
 			leftcost = heuristic((cur_x - 1, cur_y), (x_end, y_end))
 
-			if(leftnode.x, leftnode.y) not in explored and (leftnode.x, leftnode.y) not in frontier:
+			if(leftnode.x, leftnode.y) not in explored and (leftnode.x, leftnode.y) not in frontierloc:
 				if leftnode.x == x_end and leftnode.y == y_end:
 					return (leftnode, cost)
 				heapq.heappush(frontier, (leftcost, leftnode))
