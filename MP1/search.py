@@ -223,8 +223,116 @@ def dfs_search(mapname):
 				frontiernode.append(child)
 	return (None, cost)
 
-def aStar_search(mapname, startNode, endNode):
+def aStar_search(mapname):
 	maze = read_map(mapname)
+
+	node = Node(x_start, y_start, None)
+	cur_x = node.x
+	cur_y = node.y
+
+	if(cur_x == x_end and cur_y == y_end):
+		return node 
+
+	frontier = []
+	frontierloc = deque([])
+	explored= {}
+	cost = 0
+
+	heapq.heappush(frontier, (cost, node))
+	
+	while len(frontier) > 0:
+
+		# print frontier
+		temp = heapq.heappop(frontier)
+		node = temp[1]
+		cur_x = node.x
+		cur_y = node.y
+		#print node
+
+		cost += 1
+
+		explored[(node.x, node.y)] = node.x + node.y
+		
+		# downcost = -1
+		# upcost = -1
+		# rightcost = -1
+		# leftcost = -1
+
+		if node.x == x_end and node.y == y_end:
+			return node
+
+		if cur_x < right_bound and maze[cur_y][0][cur_x + 1]!= '%': 
+			rightnode = Node(cur_x+1, cur_y, None)
+			rightnode.parent = node
+			rightcost = aStar_heuristic(cost, manhattan_dist(cur_x+1, x_end, cur_y, y_end))
+
+			if(rightnode.x, rightnode.y) not in explored and (rightnode.x, rightnode.y) not in frontierloc:
+				print "RIGHT"
+				if rightnode.x == x_end and rightnode.y == y_end:
+					return (rightnode, cost)
+				heapq.heappush(frontier, (rightcost, rightnode))
+				frontierloc.append((rightnode.x, rightnode.y))
+
+
+		if cur_y < down_bound and maze[cur_y + 1][0][cur_x]!= '%':
+			downnode = Node(cur_x, cur_y+1, None)
+			downnode.parent = node
+			downcost = aStar_heuristic(cost, manhattan_dist(cur_x, x_end, cur_y+1, y_end))
+
+			if(downnode.x, downnode.y) not in explored and (downnode.x, downnode.y) not in frontierloc:
+				print "DOWN"
+				if downnode.x == x_end and downnode.y == y_end:
+					return (downnode, cost)
+				heapq.heappush(frontier, (downcost, downnode))
+				frontierloc.append((downnode.x, downnode.y))
+
+
+		if cur_y > 0 and maze[cur_y - 1][0][cur_x]!= '%':
+			upnode = Node(cur_x, cur_y-1, None)
+			upnode.parent = node
+			upcost = aStar_heuristic(cost, manhattan_dist(cur_x, x_end, cur_y-1, y_end))
+
+			if(upnode.x, upnode.y) not in explored and (upnode.x, upnode.y) not in frontierloc:
+				print "UP"
+				if upnode.x == x_end and upnode.y == y_end:
+					return (upnode, cost)
+				heapq.heappush(frontier, (upcost, upnode))
+				frontierloc.append((upnode.x, upnode.y))
+		
+
+
+		if cur_x > 0 and maze[cur_y][0][cur_x-1]!= '%':
+			leftnode = Node(cur_x-1, cur_y, None)
+			leftnode.parent = node
+			leftcost = aStar_heuristic(cost, manhattan_dist(cur_x-1, x_end, cur_y, y_end))
+
+			if(leftnode.x, leftnode.y) not in explored and (leftnode.x, leftnode.y) not in frontierloc:
+				print "LEFT"
+				if leftnode.x == x_end and leftnode.y == y_end:
+					return (leftnode, cost)
+				heapq.heappush(frontier, (leftcost, leftnode))
+				frontierloc.append((leftnode.x, leftnode.y))
+
+	return None
+
+def aStar_heuristic(cost, dist):
+	return cost+dist
+
+def manhattan_dist(x1, x2, y1, y2):
+	dist = abs(x1 - x2) - (y1 - y2)
+	return dist
+
+def closest_real_dist_heuristic(mapname, fruitList):
+	node = Node(x_start, y_start, None)
+	cur_x = node.x
+	cur_y = node.y
+	nextNode = None
+	
+	while len(fruitList) != 0:
+		
+
+
+		maze = read_map(mapname)
 
 	node = startNode
 	cur_x = startNode.x
@@ -253,7 +361,8 @@ def aStar_search(mapname, startNode, endNode):
 		cur_y = node.y
 		#print node
 
-		cost+=1
+		cost = temp[0] + 1
+		print "COST", cost
 
 		explored[(node.x, node.y)] = node.x + node.y
 		
@@ -302,7 +411,7 @@ def aStar_search(mapname, startNode, endNode):
 		if cur_x > 0 and maze[cur_y][0][cur_x-1]!= '%':
 			leftnode = Node(cur_x-1, cur_y, None)
 			leftnode.parent = node
-			downcost = aStar_heuristic(cost, manhattan_dist(cur_x-1, x_end, cur_y, y_end))
+			leftcost = aStar_heuristic(cost, manhattan_dist(cur_x-1, x_end, cur_y, y_end))
 
 			if(leftnode.x, leftnode.y) not in explored and (leftnode.x, leftnode.y) not in frontier:
 				if leftnode.x == x_end and leftnode.y == y_end:
@@ -311,42 +420,6 @@ def aStar_search(mapname, startNode, endNode):
 				frontierloc.append((leftnode.x, leftnode.y))
 
 	return None
-
-def aStar_heuristic(cost, dist):
-	return cost+dist
-
-def manhattan_dist(x1, x2, y1, y2):
-	dist = abs(x1 - x2) - (y1 - y2)
-	return dist
-
-def closest_real_dist_heuristic(mapname, fruitList):
-	node = Node(x_start, y_start, None)
-	cur_x = node.x
-	cur_y = node.y
-	nextNode = None
-	
-	while len(fruitList) != 0:
-		cost = 0
-		for x in range(len(fruitList)):
-			food_x = fruitList[x][0]
-			food_y = fruitList[x][1]
-			fruitNode = Node(food_x, food_y, None) 
-			returnFruitCost = aStar_search(mapname, node, fruitNode)
-			if returnFruitCost != None: 
-				if x == 0 or returnFruitCost[1] < cost:
-					cost = returnFruitCost[1]
-					nextNode = returnFruitCost[0]
-					# print nextNode.x, nextNode.y, cost
-			else:
-				return None
-			
-			cur_x = food_x
-			cur_y = food_y
-		if (nextNode.x, nextNode.y) in fruitList:
-			print nextNode.x, nextNode.y
-			fruitList.remove((nextNode.x, nextNode.y)) 
-
-	return returnFruitCost
 
 
 # This function conducts a greedy best-first search of the maze. Returns pointer
@@ -402,7 +475,7 @@ def greedybfs_search(mapname):
 			downnode.parent = node
 			downcost = heuristic((cur_x, cur_y + 1), (x_end, y_end))
 
-			if(downnode.x, downnode.y) not in explored and (downnode.x, downnode.y) not in frontier:
+			if(downnode.x, downnode.y) not in explored and (downnode.x, downnode.y) not in frontierloc:
 				if downnode.x == x_end and downode.y == y_end:
 					return (downnode, cost)
 				heapq.heappush(frontier, (downcost, downnode))
@@ -415,7 +488,7 @@ def greedybfs_search(mapname):
 			upnode.parent = node
 			upcost = heuristic((cur_x, cur_y - 1), (x_end, y_end))
 
-			if(upnode.x, upnode.y) not in explored and (upnode.x, upnode.y) not in frontier:
+			if(upnode.x, upnode.y) not in explored and (upnode.x, upnode.y) not in frontierloc:
 				if upnode.x == x_end and upnode.y == y_end:
 					return (upnode, cost)
 				heapq.heappush(frontier, (upcost, upnode))
@@ -429,7 +502,7 @@ def greedybfs_search(mapname):
 			leftnode.parent = node
 			leftcost = heuristic((cur_x - 1, cur_y), (x_end, y_end))
 
-			if(leftnode.x, leftnode.y) not in explored and (leftnode.x, leftnode.y) not in frontier:
+			if(leftnode.x, leftnode.y) not in explored and (leftnode.x, leftnode.y) not in frontierloc:
 				if leftnode.x == x_end and leftnode.y == y_end:
 					return (leftnode, cost)
 				heapq.heappush(frontier, (leftcost, leftnode))
@@ -473,10 +546,10 @@ def main(mapname):
 	#cost = temp2[1]
 	#counter = temp2[2]
 	
-	# temp2 = aStar_search(mapname)
+	temp2 = greedybfs_search(mapname)
 
 	fruitList = fruit
-	temp2 = closest_real_dist_heuristic(mapname, fruitList)
+	# temp2 = closest_real_dist_heuristic(mapname, fruitList)
 	print "Actual End", temp2[0].x, temp2[0].y, temp2[1]
 	print "Parent", temp2[0].parent.x, temp2[0].parent.y
 
@@ -490,6 +563,8 @@ def main(mapname):
 			#print temp.x, temp.y
 			solution.append ((temp.x, temp.y))
 			temp = temp.parent
+			# print temp.x, temp.y
+		# print solution[::-1]
 
 	#print solution
 	#print "COST: " + str(cost)
@@ -499,4 +574,4 @@ def main(mapname):
 	print "Solution drawn to " + mapname[:-4] + "test.txt"
 
 if __name__ == "__main__":
-	main("mediumSearch.txt")
+	main("openMaze.txt")
