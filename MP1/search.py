@@ -1,6 +1,7 @@
 from collections import deque
 from node import Node
 import heapq
+import string as stringz
 
 # global definition# 
 x_start = 0
@@ -326,28 +327,18 @@ def closest_real_dist_heuristic(mapname, fruitList):
 	node = Node(x_start, y_start, None)
 	cur_x = node.x
 	cur_y = node.y
-	
-<<<<<<< HEAD
-	while len(fruitList) != 0:
 
-		maze = read_map(mapname)
+	if len(fruitList) == 0: 
+		return None
 
-	node = startNode
-	cur_x = startNode.x
-	cur_y = startNode.y
 
-	x_end = endNode.x
-	y_end = endNode.y
-
-	if(cur_x == x_end and cur_y == y_end):
-		return node 
-
-	frontier = []
+	frontier = [] 
 	frontierloc = deque([])
-	explored= {}
-	cost = 0
+	explored = {}
+	cost = 0 
+	eatenlist = []
 
-	heapq.heappush(frontier, (cost, node))
+	heapq.heappush(frontier, (cost,node))
 
 	while len(fruitList) > 0:
 		
@@ -375,6 +366,7 @@ def closest_real_dist_heuristic(mapname, fruitList):
 				if (rightnode.x, rightnode.y) in fruitList:
 					print rightnode.x, rightnode.y
 					fruitList.remove((rightnode.x, rightnode.y))
+					eatenlist.append((rightnode.x, rightnode.y))
 				heapq.heappush(frontier, (rightcost, rightnode))
 				frontierloc.append((rightnode.x, rightnode.y))
 
@@ -388,6 +380,7 @@ def closest_real_dist_heuristic(mapname, fruitList):
 				if (downnode.x, downnode.y) in fruitList:
 					print downnode.x, downnode.y
 					fruitList.remove((downnode.x, downnode.y))
+					eatenlist.append((downnode.x, downnode.y))
 				heapq.heappush(frontier, (downcost, downnode))
 				frontierloc.append((downnode.x, downnode.y))
 
@@ -401,10 +394,10 @@ def closest_real_dist_heuristic(mapname, fruitList):
 				if (upnode.x, upnode.y) in fruitList:
 					print upnode.x, upnode.y
 					fruitList.remove((upnode.x, upnode.y))
+					eatenlist.append((upnode.x, upnode.y))
 				heapq.heappush(frontier, (upcost, upnode))
 				frontierloc.append((upnode.x, upnode.y))
 		
-
 
 		if cur_x > 0 and maze[cur_y][0][cur_x-1]!= '%':
 			leftnode = Node(cur_x-1, cur_y, None)
@@ -415,10 +408,11 @@ def closest_real_dist_heuristic(mapname, fruitList):
 				if (leftnode.x, leftnode.y) in fruitList:
 					print leftnode.x, leftnode.y
 					fruitList.remove((leftnode.x, leftnode.y))
+					eatenlist.append((leftnode.x, leftnode.y))
 				heapq.heappush(frontier, (leftcost, leftnode))
 				frontierloc.append((leftnode.x, leftnode.y))
 
-	return None
+	return eatenlist
 
 
 # This function conducts a greedy best-first search of the maze. Returns pointer
@@ -519,7 +513,9 @@ def draw_solution(mapname, solution_path):
 			for string in line:
 				for xpos, char in enumerate(string):
 					if (xpos, ypos) in solution_path and (xpos, ypos)!= (x_start, y_start): 
-						outFile.write('.')
+						#outFile.write('.')
+						#outFile.write(stringz.printable)
+						outFile.write(stringz.printable[solution_path.index((xpos,ypos))])
 				 	else:
 						outFile.write(char)
 			outFile.write('\n')
@@ -546,7 +542,7 @@ def main(mapname):
 	#counter = temp2[2]
 	
 	fruitList = fruit
-	closest_real_dist_heuristic(mapname, fruitList)
+	solution = closest_real_dist_heuristic(mapname, fruitList)
 
 	# temp2 = closest_real_dist_heuristic(mapname, fruitList)
 	# print "Actual End", temp2[0].x, temp2[0].y, temp2[1]
