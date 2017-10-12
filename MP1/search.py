@@ -336,6 +336,7 @@ def closest_real_dist_heuristic(mapname, fruitList):
 	frontierloc = deque([])
 	explored = {}
 	cost = 0 
+	returncost = 0 
 	eatenlist = []
 
 	heapq.heappush(frontier, (cost,node))
@@ -348,14 +349,11 @@ def closest_real_dist_heuristic(mapname, fruitList):
 		cur_x = node.x
 		cur_y = node.y
 
+		returncost += 1
 		cost += 1
 
 		explored[(node.x, node.y)] = node.x + node.y
-		
-		downcost = -1
-		upcost = -1
-		rightcost = -1
-		leftcost = -1
+	
 
 		if cur_x < right_bound and maze[cur_y][0][cur_x + 1]!= '%': 
 			rightnode = Node(cur_x+1, cur_y, None)
@@ -367,6 +365,7 @@ def closest_real_dist_heuristic(mapname, fruitList):
 					print rightnode.x, rightnode.y
 					fruitList.remove((rightnode.x, rightnode.y))
 					eatenlist.append((rightnode.x, rightnode.y))
+					returncost += rightcost 
 				heapq.heappush(frontier, (rightcost, rightnode))
 				frontierloc.append((rightnode.x, rightnode.y))
 
@@ -381,6 +380,7 @@ def closest_real_dist_heuristic(mapname, fruitList):
 					print downnode.x, downnode.y
 					fruitList.remove((downnode.x, downnode.y))
 					eatenlist.append((downnode.x, downnode.y))
+					returncost += downcost
 				heapq.heappush(frontier, (downcost, downnode))
 				frontierloc.append((downnode.x, downnode.y))
 
@@ -395,6 +395,7 @@ def closest_real_dist_heuristic(mapname, fruitList):
 					print upnode.x, upnode.y
 					fruitList.remove((upnode.x, upnode.y))
 					eatenlist.append((upnode.x, upnode.y))
+					returncost += upcost
 				heapq.heappush(frontier, (upcost, upnode))
 				frontierloc.append((upnode.x, upnode.y))
 		
@@ -409,11 +410,10 @@ def closest_real_dist_heuristic(mapname, fruitList):
 					print leftnode.x, leftnode.y
 					fruitList.remove((leftnode.x, leftnode.y))
 					eatenlist.append((leftnode.x, leftnode.y))
+					returncost += leftcost
 				heapq.heappush(frontier, (leftcost, leftnode))
 				frontierloc.append((leftnode.x, leftnode.y))
-
-	return eatenlist
-
+	return returncost
 
 # This function conducts a greedy best-first search of the maze. Returns pointer
 # to last solution node and total path cost as a tuple (node, cost). 
@@ -565,8 +565,9 @@ def main(mapname):
 	#print "COST: " + str(cost)
 	#print "NUMBER OF EXPANDED NODES: " + str(counter)
 	print "Fruit:" + str(fruit)
-	draw_solution(mapname, solution)
+	#draw_solution(mapname, solution)
+	print "cost: " + str(solution) 
 	print "Solution drawn to " + mapname[:-4] + "test.txt"
 
 if __name__ == "__main__":
-	main("smallSearch.txt")
+	main("mediumSearch.txt")
