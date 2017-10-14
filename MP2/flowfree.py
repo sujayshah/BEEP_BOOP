@@ -12,7 +12,11 @@ def readFile(filename):
 	return flowFreeMap
 
 
+def dumb_csp_search(grid):
 
+
+def smart_csp_search(grid):
+	
 
 def main(filename):
 	flowFree = readFile(filename)
@@ -51,6 +55,9 @@ def main(filename):
 				
 	for space in grid:
 		print space.x, space.y, space.assignment, space.domain
+
+	dumb_csp_search(grid)
+	# smart_csp_search(grid)
 
 if __name__ == "__main__" : 
 	main("input77.txt")
