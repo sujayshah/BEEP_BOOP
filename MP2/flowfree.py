@@ -32,47 +32,63 @@ def dumb_csp_search(grid):
 	# print space.x, space.y, space.assignment, space.domain, space.state
 
 
-def findPath(grid, start, path, goal):
+def findPath(grid, start, goal):
+	path = []
+	visited = []
 	valid = 0
-	if (start.x < 0) or (start.y < 0) or (start.x >= len(grid)) or (start.y >= len(grid[0])) or (grid[x][y]).assignment == ' ':
+
+	if (start.x < 0) or (start.y < 0) or (start.x >= len(grid)) or (start.y >= len(grid[0])) or start.assignment == ' ':
 		return None
 
 	if(start.x == goal.x and start.y == goal.y):
 		return path
 
-	path.append(grid[start.x][start.y])
-	while (start.x != goal.x) and (start.y != goal.y):
-		if x > 0:
-			if (grid[x-1][y]).assignment == grid[x][y]:
+	path.append(start)
+	visited.append((start.x, start.y))
+
+	while start.x != goal.x and start.y != goal.y:
+		print start.x, start.y
+		x = start.x
+		y = start.y
+
+		if start.x > 0 and (x-1, y) not in visited:
+			if (grid[x-1][y]).assignment == start.assignment:
 				path.append(grid[x-1][y])
+				visited.append((x-1, y))
 				valid += 1 
 
-		if x < len(grid)-1:
-			if (grid[x+1][y]).assignment == grid[x][y]:
+		if start.x < len(grid)-1 and (x+1, y) not in visited:
+			if (grid[x+1][y]).assignment == start.assignment:
 				path.append(grid[x+1][y])
+				visited.append((x+1, y))
 				valid += 1
 
-		if y > 0:
-			if (grid[x][y-1]).assignment == grid[x][y]:
+		if start.y > 0 and (x, y-1) not in visited:
+			if (grid[x][y-1]).assignment == start.assignment:
 				path.append(grid[x][y-1])
+				visited.append((x, y-1))
 				valid += 1
 
-		if y < len(grid)-1:
-			if (grid[x][y+1]).assignment == grid[x][y]:
+		if start.y < len(grid)-1 and (x, y+1) not in visited:
+			if (grid[x][y+1]).assignment == start.assignment:
 				path.append(grid[x][y+1])
+				visited.append((x, y+1))
 				valid += 1
 
 		if(valid != 1):
 			return None
 
 		valid = 0
-
+		print "NEWSTART", path[-1].x, path[-1].y
+		start = path[-1]
+		print "GOAL", goal.x, goal.y
 	return path
 
 
 def main(filename):
 	flowFree = readFile(filename)
 	colorList = []
+	colorLoc = {}
 	grid = []
 	x = 0
 	for line in flowFree:
@@ -82,6 +98,7 @@ def main(filename):
 			for c in range(0,len(s)):
 				if s[c] not in colorList and s[c] != '_':
 					colorList.append(s[c])
+					colorLoc[s[c]+'Start'] = (x, c)
 				
 				if s[c] == '_':
 					var = Variable(x, c, ' ', None, None)
@@ -92,6 +109,7 @@ def main(filename):
 					var = Variable(x, c, s[c], None, None)
 					var.domain.append(s[c])
 					var.state = 1
+					colorLoc[s[c]+'End'] = (x, c)
 
 				grid2.append(var)
 			
@@ -101,9 +119,17 @@ def main(filename):
 	# for space in grid:
 	# 	print space.x, space.y, space.assignment, space.domain
 
-	findPath()
+	yellowStart = colorLoc.get('YStart')
+	yellowEnd = colorLoc.get('YEnd')
+	# print yellowStart, yellowEnd
+	print "START", grid[yellowStart[0]][yellowStart[1]].x, grid[yellowStart[0]][yellowStart[1]].y, grid[yellowStart[0]][yellowStart[1]].assignment
+	print "END", grid[yellowEnd[0]][yellowEnd[1]].x, grid[yellowEnd[0]][yellowEnd[1]].y, grid[yellowEnd[0]][yellowEnd[1]].assignment
+	print "LEN", len
+	me = findPath(grid, grid[yellowStart[0]][yellowStart[1]], grid[yellowEnd[0]][yellowEnd[1]])
+	# for i in me:
+	# 	print i.x, i.y
 	# dumb_csp_search(grid)
 	# smart_csp_search(grid)
 
 if __name__ == "__main__" : 
-	main("input88.txt")
+	main("inputPathFinder.txt")
