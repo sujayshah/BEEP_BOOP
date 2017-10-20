@@ -46,7 +46,7 @@ def findPath(grid, start, goal):
 	path.append(start)
 	visited.append((start.x, start.y))
 
-	while start.x != goal.x and start.y != goal.y:
+	while (start.x != goal.x or start.y != goal.y):
 		print start.x, start.y
 		x = start.x
 		y = start.y
@@ -57,7 +57,7 @@ def findPath(grid, start, goal):
 				visited.append((x-1, y))
 				valid += 1 
 
-		if start.x < len(grid)-1 and (x+1, y) not in visited:
+		if start.x < len(grid) and (x+1, y) not in visited:
 			if (grid[x+1][y]).assignment == start.assignment:
 				path.append(grid[x+1][y])
 				visited.append((x+1, y))
@@ -69,7 +69,7 @@ def findPath(grid, start, goal):
 				visited.append((x, y-1))
 				valid += 1
 
-		if start.y < len(grid)-1 and (x, y+1) not in visited:
+		if start.y < len(grid) and (x, y+1) not in visited:
 			if (grid[x][y+1]).assignment == start.assignment:
 				path.append(grid[x][y+1])
 				visited.append((x, y+1))
@@ -124,7 +124,7 @@ def main(filename):
 	# print yellowStart, yellowEnd
 	print "START", grid[yellowStart[0]][yellowStart[1]].x, grid[yellowStart[0]][yellowStart[1]].y, grid[yellowStart[0]][yellowStart[1]].assignment
 	print "END", grid[yellowEnd[0]][yellowEnd[1]].x, grid[yellowEnd[0]][yellowEnd[1]].y, grid[yellowEnd[0]][yellowEnd[1]].assignment
-	print "LEN", len
+	print "LEN", len(grid)
 	me = findPath(grid, grid[yellowStart[0]][yellowStart[1]], grid[yellowEnd[0]][yellowEnd[1]])
 	# for i in me:
 	# 	print i.x, i.y
