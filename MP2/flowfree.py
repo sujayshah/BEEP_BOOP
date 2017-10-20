@@ -36,7 +36,7 @@ def findPath(grid, start, goal):
 	path = []
 	visited = []
 	valid = 0
-
+	
 	if (start.x < 0) or (start.y < 0) or (start.x >= len(grid)) or (start.y >= len(grid[0])) or start.assignment == ' ':
 		return None
 
@@ -47,31 +47,29 @@ def findPath(grid, start, goal):
 	visited.append((start.x, start.y))
 
 	while (start.x != goal.x or start.y != goal.y):
-		print start.x, start.y
 		x = start.x
 		y = start.y
-
 		if start.x > 0 and (x-1, y) not in visited:
-			if (grid[x-1][y]).assignment == start.assignment:
-				path.append(grid[x-1][y])
+			if (grid[y][x-1]).assignment == start.assignment:
+				path.append(grid[y][x-1])
 				visited.append((x-1, y))
 				valid += 1 
 
-		if start.x < len(grid) and (x+1, y) not in visited:
-			if (grid[x+1][y]).assignment == start.assignment:
-				path.append(grid[x+1][y])
+		if start.x < len(grid)-1 and (x+1, y) not in visited:
+			if (grid[y][x+1]).assignment == start.assignment:
+				path.append(grid[y][x+1])
 				visited.append((x+1, y))
 				valid += 1
 
 		if start.y > 0 and (x, y-1) not in visited:
-			if (grid[x][y-1]).assignment == start.assignment:
-				path.append(grid[x][y-1])
+			if (grid[y-1][x]).assignment == start.assignment:
+				path.append(grid[y-1][x])
 				visited.append((x, y-1))
 				valid += 1
 
-		if start.y < len(grid) and (x, y+1) not in visited:
-			if (grid[x][y+1]).assignment == start.assignment:
-				path.append(grid[x][y+1])
+		if start.y < len(grid)-1 and (x, y+1) not in visited:
+			if (grid[y+1][x]).assignment == start.assignment:
+				path.append(grid[y+1][x])
 				visited.append((x, y+1))
 				valid += 1
 
@@ -79,9 +77,8 @@ def findPath(grid, start, goal):
 			return None
 
 		valid = 0
-		print "NEWSTART", path[-1].x, path[-1].y
 		start = path[-1]
-		print "GOAL", goal.x, goal.y
+
 	return path
 
 
@@ -90,7 +87,7 @@ def main(filename):
 	colorList = []
 	colorLoc = {}
 	grid = []
-	x = 0
+	y = 0
 	for line in flowFree:
 		for s in line: 
 			grid2 = []
@@ -98,36 +95,37 @@ def main(filename):
 			for c in range(0,len(s)):
 				if s[c] not in colorList and s[c] != '_':
 					colorList.append(s[c])
-					colorLoc[s[c]+'Start'] = (x, c)
+					colorLoc[s[c]+'Start'] = (c, y)
 				
 				if s[c] == '_':
-					var = Variable(x, c, ' ', None, None)
+					var = Variable(c, y, ' ', None, None)
 					var.domain = colorList
 					var.state = 0
 
 				else:
-					var = Variable(x, c, s[c], None, None)
+					var = Variable(c, y, s[c], None, None)
 					var.domain.append(s[c])
 					var.state = 1
-					colorLoc[s[c]+'End'] = (x, c)
+					colorLoc[s[c]+'End'] = (c, y)
 
 				grid2.append(var)
 			
 			grid.append(grid2)
-			x+=1
+			y+=1
 				
 	# for space in grid:
 	# 	print space.x, space.y, space.assignment, space.domain
 
-	yellowStart = colorLoc.get('YStart')
-	yellowEnd = colorLoc.get('YEnd')
-	# print yellowStart, yellowEnd
-	print "START", grid[yellowStart[0]][yellowStart[1]].x, grid[yellowStart[0]][yellowStart[1]].y, grid[yellowStart[0]][yellowStart[1]].assignment
-	print "END", grid[yellowEnd[0]][yellowEnd[1]].x, grid[yellowEnd[0]][yellowEnd[1]].y, grid[yellowEnd[0]][yellowEnd[1]].assignment
+	print colorLoc
+	yellowStart = colorLoc.get('RStart')
+	yellowEnd = colorLoc.get('REnd')
+
+	print "START", grid[yellowStart[1]][yellowStart[0]].x, grid[yellowStart[1]][yellowStart[0]].y, grid[yellowStart[1]][yellowStart[0]].assignment
+	print "END", grid[yellowEnd[1]][yellowEnd[0]].x, grid[yellowEnd[1]][yellowEnd[0]].y, grid[yellowEnd[1]][yellowEnd[0]].assignment
 	print "LEN", len(grid)
-	me = findPath(grid, grid[yellowStart[0]][yellowStart[1]], grid[yellowEnd[0]][yellowEnd[1]])
-	# for i in me:
-	# 	print i.x, i.y
+	colorPath = findPath(grid, grid[yellowStart[1]][yellowStart[0]], grid[yellowEnd[1]][yellowEnd[0]])
+	for i in colorPath:
+		print i.x, i.y
 	# dumb_csp_search(grid)
 	# smart_csp_search(grid)
 
