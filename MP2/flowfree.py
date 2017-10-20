@@ -32,34 +32,43 @@ def dumb_csp_search(grid):
 	# print space.x, space.y, space.assignment, space.domain, space.state
 
 
-def findPath(grid, x, y):
-	path = []
+def findPath(grid, start, path, goal):
 	valid = 0
-	if (x < 0) or (y < 0) or (x >= len(grid)) or (y >= len(grid[0])) or (grid[x][y]).assignment == ' ':
+	if (start.x < 0) or (start.y < 0) or (start.x >= len(grid)) or (start.y >= len(grid[0])) or (grid[x][y]).assignment == ' ':
 		return None
 
-	path.append(grid[x][y])
-	if x > 0:
-		if (grid[x-1][y]).assignment == grid[x][y]:
-			path.append(grid[x-1][y])
-			valid += 1 
+	if(start.x == goal.x and start.y == goal.y):
+		return path
 
-	if x < len(grid)-1:
-		if (grid[x+1][y]).assignment == grid[x][y]:
-			path.append(grid[x+1][y])
-			valid += 1
+	path.append(grid[start.x][start.y])
+	while (start.x != goal.x) and (start.y != goal.y):
+		if x > 0:
+			if (grid[x-1][y]).assignment == grid[x][y]:
+				path.append(grid[x-1][y])
+				valid += 1 
 
-	if y > 0:
-		if (grid[x][y-1]).assignment == grid[x][y]:
-			path.append(grid[x][y-1])
-			valid += 1
+		if x < len(grid)-1:
+			if (grid[x+1][y]).assignment == grid[x][y]:
+				path.append(grid[x+1][y])
+				valid += 1
 
-	if y < len(grid)-1:
-		if (grid[x][y+1]).assignment == grid[x][y]:
-			path.append(grid[x][y+1])
-			valid += 1
+		if y > 0:
+			if (grid[x][y-1]).assignment == grid[x][y]:
+				path.append(grid[x][y-1])
+				valid += 1
 
-	return valid if (valid == 1) else None
+		if y < len(grid)-1:
+			if (grid[x][y+1]).assignment == grid[x][y]:
+				path.append(grid[x][y+1])
+				valid += 1
+
+		if(valid != 1):
+			return None
+
+		valid = 0
+
+	return path
+
 
 def main(filename):
 	flowFree = readFile(filename)
@@ -92,7 +101,8 @@ def main(filename):
 	# for space in grid:
 	# 	print space.x, space.y, space.assignment, space.domain
 
-	dumb_csp_search(grid)
+	findPath()
+	# dumb_csp_search(grid)
 	# smart_csp_search(grid)
 
 if __name__ == "__main__" : 
