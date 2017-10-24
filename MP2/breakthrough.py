@@ -11,14 +11,27 @@ white_list = []
 # This function reads in the grid from the text file and generates the 
 # 2D array to traverse through. NOTE: to access (x,y) locations in the maze
 # you must call it as grid[y][0][x]. 
-def read_grid(gridname):
-	textFile = open(gridname, "r")
-	grid = []
+def read_grid():
+	
+	grid = [[' ' for x in range(9)] for y in range(9)]
+	for numy in range(9):
+		for numx in range(9):
+			if numx == 0 or numx == 8:
+				grid[numy][numx] = '%'
+			if numy == 0 or numy == 8:
+				grid[numy][numx] = '%'
+			
+			if(numx>0 and numx<8):
+				if(numy == 1 or numy == 2):
+					grid[numy][numx] = 'B'
+				if(numy == 6 or numy == 7):
+					grid[numy][numx] = 'W'
 
-	for line in textFile:
-		grid.append(line.strip().split('\r\n '))
+	#textFile = open(gridname, "r")
+	#for line in textFile:
+	#	grid.append(line.strip().split('\r\n '))
 
-	textFile.close()
+	#textFile.close()
 
 	return grid
 
@@ -81,27 +94,30 @@ def offensive_heuristic(num_opposing_remaining):
 
 def get_possible_moves(gridname, node):
 	
-	for piece in white_list:
-		x = piece[0]
-		y = piece[1]
-		if can_move(gridname, x-1,y-1): #left diagonal
-			temp_grid0 = read_grid(gridname)
-			temp_grid0[y][0][x] = ' ' #vacate old spot
-			temp_grid0[y-1][0][x-1] = 'W' #move to new spot
-			leftnode = Node(temp_grid0)
-			node.child.append(leftnode)
-		if can_move(gridname, x, y-1): #straight
-			temp_grid1 = read_grid(gridname)
-			temp_grid1[y][0][x] = ' '
-			temp_grid1[y-1][0][x] = 'W'
-			straightnode = Node(temp_grid1)
-			node.child.append(straightnode)
-		if can_move(gridname, x+1, y-1): #right diagonal
-			temp_grid2 = read_grid(gridname)
-			temp_grid2[y][0][x] = ' '
-			temp_grid2[y-1][0][x+1] = 'W'
-			rightnode = Node(temp_grid2)
-			node.child.append(rightnode)
+	# for piece in white_list:
+	# 	x = piece[0]
+	# 	y = piece[1]
+	# 	if can_move(gridname, x-1,y-1): #left diagonal
+	# 		temp_grid0 = read_grid(gridname)
+	# 		temp_grid0[y][0][x] = ' ' #vacate old spot
+	# 		temp_grid0[y-1][0][x-1] = 'W' #move to new spot
+	# 		leftnode = Node(temp_grid0)
+	# 		node.child.append(leftnode)
+	# 	if can_move(gridname, x, y-1): #straight
+	# 		temp_grid1 = read_grid(gridname)
+	# 		temp_grid1[y][0][x] = ' '
+	# 		temp_grid1[y-1][0][x] = 'W'
+	# 		straightnode = Node(temp_grid1)
+	# 		node.child.append(straightnode)
+	# 	if can_move(gridname, x+1, y-1): #right diagonal
+	# 		temp_grid2 = read_grid(gridname)
+	# 		temp_grid2[y][0][x] = ' '
+	# 		temp_grid2[y-1][0][x+1] = 'W'
+	# 		rightnode = Node(temp_grid2)
+	# 		node.child.append(rightnode)
+	grid = read_grid(gridname)
+	grid[0][0] = 'A'
+	print grid
 
 def can_move(gridname, x, y):
 	grid = read_grid(gridname)
@@ -114,20 +130,20 @@ def can_move(gridname, x, y):
 		return False
 
 def main(gridname):
-	grid = read_grid(gridname)
+	grid = read_grid()
 
-	for line in grid: #line is one row of the board
-		for s in line: 
-			print s
+	print('\n'.join([''.join(['{:1}'.format(item) for item in row]) for row in grid]))
+	 	
 
-	populate_lists(gridname)
-	print "Black list:" + str(black_list)
-	print "Num black pieces: " + str(len(black_list))
-	print "White list:" + str(white_list)
-	print "Num white pieces: " + str(len(white_list))
+	# populate_lists(gridname)
+	# print "Black list:" + str(black_list)
+	# print "Num black pieces: " + str(len(black_list))
+	# print "White list:" + str(white_list)
+	# print "Num white pieces: " + str(len(white_list))
 	
-	new_game = Node(grid)
-	get_possible_moves(gridname, new_game)
+	# new_game = Node(grid)
+	# get_possible_moves(gridname, new_game)
+	#print grid
 
 	#print minimax(gridname, node, 1, defensive, True)
 
