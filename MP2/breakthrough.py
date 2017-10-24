@@ -13,18 +13,18 @@ white_list = []
 # you must call it as grid[y][0][x]. 
 def read_grid():
 	
-	grid = [[' ' for x in range(9)] for y in range(9)]
-	for numy in range(9):
-		for numx in range(9):
-			if numx == 0 or numx == 8:
+	grid = [[' ' for x in range(10)] for y in range(10)]
+	for numy in range(10):
+		for numx in range(10):
+			if numx == 0 or numx == 9:
 				grid[numy][numx] = '%'
-			if numy == 0 or numy == 8:
+			if numy == 0 or numy == 9:
 				grid[numy][numx] = '%'
 			
-			if(numx>0 and numx<8):
+			if(numx>0 and numx<9):
 				if(numy == 1 or numy == 2):
 					grid[numy][numx] = 'B'
-				if(numy == 6 or numy == 7):
+				if(numy == 7 or numy == 8):
 					grid[numy][numx] = 'W'
 
 	#textFile = open(gridname, "r")
@@ -37,18 +37,25 @@ def read_grid():
 
 # This function adds the (x,y) positions of the white and black pieces to their respective
 # lists. 
-def populate_lists(gridname):
-	grid = read_grid(gridname)
+def populate_lists():
+	grid = read_grid()
 	global black_list
 	global white_list
 
-	for ypos, line in enumerate(grid): 
-		for string in line: 
-			for xpos, char in enumerate(string):
-				if char == 'B':
-					black_list.append((xpos, ypos))
-				if char == 'W':
-					white_list.append((xpos, ypos))
+	# for ypos, line in enumerate(grid): 
+	# 	for string in line: 
+	# 		for xpos, char in enumerate(string):
+	# 			if char == 'B':
+	# 				black_list.append((xpos, ypos))
+	# 			if char == 'W':
+	# 				white_list.append((xpos, ypos))
+	for ypos in range(10):
+		for xpos in range(10):
+			if grid[ypos][xpos] == 'B':
+				black_list.append((xpos,ypos))
+			if grid[ypos][xpos] == 'W':
+				white_list.append((xpos, ypos))
+
 					
 #implement depth-limited minimax for search tree of depth 3; assuming we are the white player
 def minimax(gridname, node, depth, heuristic_type, isMax):
@@ -135,11 +142,11 @@ def main(gridname):
 	print('\n'.join([''.join(['{:1}'.format(item) for item in row]) for row in grid]))
 	 	
 
-	# populate_lists(gridname)
-	# print "Black list:" + str(black_list)
-	# print "Num black pieces: " + str(len(black_list))
-	# print "White list:" + str(white_list)
-	# print "Num white pieces: " + str(len(white_list))
+	populate_lists()
+	print "Black list:" + str(black_list)
+	print "Num black pieces: " + str(len(black_list))
+	print "White list:" + str(white_list)
+	print "Num white pieces: " + str(len(white_list))
 	
 	# new_game = Node(grid)
 	# get_possible_moves(gridname, new_game)
