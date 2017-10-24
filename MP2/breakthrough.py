@@ -99,11 +99,11 @@ def defensive_heuristic(num_pieces_remaining):
 def offensive_heuristic(num_opposing_remaining):
 	return 2 * (30 - num_opposing_remaining) + random()
 
-def get_possible_moves(gridname, node):
+def get_possible_moves():
 	
-	# for piece in white_list:
-	# 	x = piece[0]
-	# 	y = piece[1]
+	 #for piece in listname:
+	 #	x = piece[0]
+	 #	y = piece[1]
 	# 	if can_move(gridname, x-1,y-1): #left diagonal
 	# 		temp_grid0 = read_grid(gridname)
 	# 		temp_grid0[y][0][x] = ' ' #vacate old spot
@@ -122,9 +122,12 @@ def get_possible_moves(gridname, node):
 	# 		temp_grid2[y-1][0][x+1] = 'W'
 	# 		rightnode = Node(temp_grid2)
 	# 		node.child.append(rightnode)
-	grid = read_grid(gridname)
+	grid = read_grid()
 	grid[0][0] = 'A'
-	print grid
+	print_grid(grid)
+
+def print_grid(gridname):
+	print('\n'.join([''.join(['{:1}'.format(item) for item in row]) for row in gridname]))
 
 def can_move(gridname, x, y):
 	grid = read_grid(gridname)
@@ -139,9 +142,6 @@ def can_move(gridname, x, y):
 def main(gridname):
 	grid = read_grid()
 
-	print('\n'.join([''.join(['{:1}'.format(item) for item in row]) for row in grid]))
-	 	
-
 	populate_lists()
 	print "Black list:" + str(black_list)
 	print "Num black pieces: " + str(len(black_list))
@@ -149,7 +149,7 @@ def main(gridname):
 	print "Num white pieces: " + str(len(white_list))
 	
 	# new_game = Node(grid)
-	# get_possible_moves(gridname, new_game)
+	get_possible_moves()
 	#print grid
 
 	#print minimax(gridname, node, 1, defensive, True)
