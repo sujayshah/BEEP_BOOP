@@ -149,7 +149,7 @@ def is_valid(x, y, action):
 def main(gridname):
 	grid = read_grid()
 
-	populate_lists()
+	populate_lists()2
 	print "Black list:" + str(black_list)
 	print "Num black pieces: " + str(len(black_list))
 	print "White list:" + str(white_list)
