@@ -12,7 +12,6 @@ white_list = []
 # 2D array to traverse through. NOTE: to access (x,y) locations in the maze
 # you must call it as grid[y][0][x]. 
 def read_grid():
-	
 	grid = [[' ' for x in range(10)] for y in range(10)]
 	for numy in range(10):
 		for numx in range(10):
@@ -100,23 +99,25 @@ def offensive_heuristic(num_opposing_remaining):
 	return 2 * (30 - num_opposing_remaining) + random()
 
 def get_possible_moves():
-	
-	 #for piece in listname:
-	 #	x = piece[0]
-	 #	y = piece[1]
-	# 	if can_move(gridname, x-1,y-1): #left diagonal
-	# 		temp_grid0 = read_grid(gridname)
+	for piece in white_list:
+		x = piece[0]
+		y = piece[1]
+	 	if is_valid(x-1,y-1, 0): #left diagonal
+	 		print "(" + str(x) + ", " + str(y) + ") can move left diagonal."
+	# 		temp_grid0= read_grid(gridname)
 	# 		temp_grid0[y][0][x] = ' ' #vacate old spot
 	# 		temp_grid0[y-1][0][x-1] = 'W' #move to new spot
 	# 		leftnode = Node(temp_grid0)
 	# 		node.child.append(leftnode)
-	# 	if can_move(gridname, x, y-1): #straight
+	 	if is_valid(x, y-1, 1): #straight
+	 		print "(" + str(x) + ", " + str(y) + ") can move straight."
 	# 		temp_grid1 = read_grid(gridname)
 	# 		temp_grid1[y][0][x] = ' '
 	# 		temp_grid1[y-1][0][x] = 'W'
 	# 		straightnode = Node(temp_grid1)
 	# 		node.child.append(straightnode)
-	# 	if can_move(gridname, x+1, y-1): #right diagonal
+	 	if is_valid(x+1, y-1, 2): #right diagonal
+	 		print "(" + str(x) + ", " + str(y) + ") can move right diagonal."
 	# 		temp_grid2 = read_grid(gridname)
 	# 		temp_grid2[y][0][x] = ' '
 	# 		temp_grid2[y-1][0][x+1] = 'W'
@@ -129,13 +130,19 @@ def get_possible_moves():
 def print_grid(gridname):
 	print('\n'.join([''.join(['{:1}'.format(item) for item in row]) for row in gridname]))
 
-def can_move(gridname, x, y):
-	grid = read_grid(gridname)
+# 0 = left diagonal, 1 = straight, 2 = right diagonal
+def is_valid(x, y, action):
+	grid = read_grid()
+
+	#make sure its a valid point within (0, 0) to (9, 9)
 	if (x >= 0 and x <= 9 and y >= 0 and y <= 9):
-		if (gridname[y][0][x]!= '%' and gridname[y][0][x]!= 'B'):
-			return True
-		else:
+		if (grid[y][x]== '%' or grid[y][x] == 'W'): #if it's a border or occupied, return false right away
 			return False
+		else:
+			if (grid[y][x] == 'B' and action == 1): #if it's occupied by black and you moved straight
+				return False
+			else:
+				return True
 	else:
 		return False
 
