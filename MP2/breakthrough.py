@@ -104,28 +104,31 @@ def get_possible_moves():
 		y = piece[1]
 	 	if is_valid(x-1,y-1, 0): #left diagonal
 	 		print "(" + str(x) + ", " + str(y) + ") can move left diagonal."
-	# 		temp_grid0= read_grid(gridname)
-	# 		temp_grid0[y][0][x] = ' ' #vacate old spot
-	# 		temp_grid0[y-1][0][x-1] = 'W' #move to new spot
+	 		temp_grid0= read_grid()
+	 		temp_grid0[y][x] = ' ' #vacate old spot
+	 		temp_grid0[y-1][x-1] = 'W' #move to new spot
+	 		print_grid(temp_grid0)
 	# 		leftnode = Node(temp_grid0)
 	# 		node.child.append(leftnode)
 	 	if is_valid(x, y-1, 1): #straight
 	 		print "(" + str(x) + ", " + str(y) + ") can move straight."
-	# 		temp_grid1 = read_grid(gridname)
-	# 		temp_grid1[y][0][x] = ' '
-	# 		temp_grid1[y-1][0][x] = 'W'
+	 		temp_grid1 = read_grid()
+	 		temp_grid1[y][x] = ' '
+	 		temp_grid1[y-1][x] = 'W'
+	 		print_grid(temp_grid1)
 	# 		straightnode = Node(temp_grid1)
 	# 		node.child.append(straightnode)
 	 	if is_valid(x+1, y-1, 2): #right diagonal
 	 		print "(" + str(x) + ", " + str(y) + ") can move right diagonal."
-	# 		temp_grid2 = read_grid(gridname)
-	# 		temp_grid2[y][0][x] = ' '
-	# 		temp_grid2[y-1][0][x+1] = 'W'
+	 		temp_grid2 = read_grid()
+			temp_grid2[y][x] = ' '
+			temp_grid2[y-1][x+1] = 'W'
+			print_grid(temp_grid2)
 	# 		rightnode = Node(temp_grid2)
 	# 		node.child.append(rightnode)
-	grid = read_grid()
-	grid[0][0] = 'A'
-	print_grid(grid)
+	# grid = read_grid()
+	# grid[0][0] = 'A'
+	# print_grid(grid)
 
 def print_grid(gridname):
 	print('\n'.join([''.join(['{:1}'.format(item) for item in row]) for row in gridname]))
