@@ -9,5 +9,5 @@ class Node:
 		# self.state = instate
 
 	def __init__(self, instate):
-		self.state = instate
-		self.possiblemoves = []
+		self.state = instate #starter grid
+		self.possiblemoves = [] # list of possible grids

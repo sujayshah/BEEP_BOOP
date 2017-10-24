@@ -98,7 +98,7 @@ def defensive_heuristic(num_pieces_remaining):
 def offensive_heuristic(num_opposing_remaining):
 	return 2 * (30 - num_opposing_remaining) + random()
 
-def get_possible_moves():
+def get_possible_moves(node):
 	for piece in white_list:
 		x = piece[0]
 		y = piece[1]
@@ -107,28 +107,25 @@ def get_possible_moves():
 	 		temp_grid0= read_grid()
 	 		temp_grid0[y][x] = ' ' #vacate old spot
 	 		temp_grid0[y-1][x-1] = 'W' #move to new spot
-	 		print_grid(temp_grid0)
-	# 		leftnode = Node(temp_grid0)
-	# 		node.child.append(leftnode)
+	 		#print_grid(temp_grid0)
+	 		leftnode = Node(temp_grid0)
+			node.possiblemoves.append(leftnode)
 	 	if is_valid(x, y-1, 1): #straight
 	 		print "(" + str(x) + ", " + str(y) + ") can move straight."
 	 		temp_grid1 = read_grid()
 	 		temp_grid1[y][x] = ' '
 	 		temp_grid1[y-1][x] = 'W'
-	 		print_grid(temp_grid1)
-	# 		straightnode = Node(temp_grid1)
-	# 		node.child.append(straightnode)
+	 		#print_grid(temp_grid1)
+	 		straightnode = Node(temp_grid1)
+	 		node.possiblemoves.append(straightnode)
 	 	if is_valid(x+1, y-1, 2): #right diagonal
 	 		print "(" + str(x) + ", " + str(y) + ") can move right diagonal."
 	 		temp_grid2 = read_grid()
 			temp_grid2[y][x] = ' '
 			temp_grid2[y-1][x+1] = 'W'
-			print_grid(temp_grid2)
-	# 		rightnode = Node(temp_grid2)
-	# 		node.child.append(rightnode)
-	# grid = read_grid()
-	# grid[0][0] = 'A'
-	# print_grid(grid)
+			#print_grid(temp_grid2)
+			rightnode = Node(temp_grid2)
+	 		node.possiblemoves.append(rightnode)
 
 def print_grid(gridname):
 	print('\n'.join([''.join(['{:1}'.format(item) for item in row]) for row in gridname]))
@@ -158,10 +155,11 @@ def main(gridname):
 	print "White list:" + str(white_list)
 	print "Num white pieces: " + str(len(white_list))
 	
-	# new_game = Node(grid)
-	get_possible_moves()
+	new_game = Node(grid)
+	get_possible_moves(new_game)
 	#print grid
 
+	print "Number of possible moves: " + str(len(new_game.possiblemoves))
 	#print minimax(gridname, node, 1, defensive, True)
 
 if __name__ == '__main__':
