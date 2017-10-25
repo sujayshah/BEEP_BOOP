@@ -27,12 +27,6 @@ def read_grid():
 				if(numy == 7 or numy == 8):
 					grid[numy][numx] = 'W'
 
-	#textFile = open(gridname, "r")
-	#for line in textFile:
-	#	grid.append(line.strip().split('\r\n '))
-
-	#textFile.close()
-
 	return grid
 
 # This function adds the (x,y) positions of the white and black pieces to their respective
@@ -42,13 +36,6 @@ def populate_lists():
 	global black_list
 	global white_list
 
-	# for ypos, line in enumerate(grid): 
-	# 	for string in line: 
-	# 		for xpos, char in enumerate(string):
-	# 			if char == 'B':
-	# 				black_list.append((xpos, ypos))
-	# 			if char == 'W':
-	# 				white_list.append((xpos, ypos))
 	for ypos in range(10):
 		for xpos in range(10):
 			if grid[ypos][xpos] == 'B':
@@ -57,102 +44,84 @@ def populate_lists():
 				white_list.append((xpos, ypos))
 
 					
-#implement depth-limited minimax for search tree of depth 3; assuming we are the white player
-# def minimax(gridname, node, depth, heuristic_type, isMax, which_list):
-# 	global black_list
-# 	global white_list
-# 	grid = read_grid(gridname)
-# 	populate_lists(gridname)
-
-# 	x = node.x 
-# 	y = node.y
-
-# 	#when you reach the depth limit, return the heuristic value
-# 	if depth == 3:
-# 		if heuristic_type == 'defensive':
-# 			return defensive_heuristic(len(white_list)) 
-# 		else: #use the offensive heuristic
-# 			return offensive_heuristic(len(black_list))
-# 	if isMax: #maximizing player is WHITE
-# 		max_value = -9999
-# 		for child in node.children:
-# 			if (child.state!= '%' and child.state!= 'W'):
-# 				if(child.state == 'B' and (child.action == 0 or child.action == 1)):
-# 					black_list.remove((child.x, child.y))
-# 				child_value = minimax(gridname, child, depth+1, heuristic_type, False)
-# 				max_value = max(max_value, child_value)
-# 		return max_value
-# 	else: #minimizing player is BLACK
-# 		min_value = -9999
-# 		for child in node.children:
-# 			if(child.state!= '%' and child.state!= 'B'):
-# 				if(child.state == 'W' and (child.action == 0 or child.action == 1)):
-# 					white_list.remove((child.x, child.y))
-# 				child_value = minimax(gridname, child, depth+1, heuristic_type, True)
-# 				min_value = min(min_value, child_value)
-# 		return min_value
-
 # minimax is given a game state
 # obtains valid moves from the game state 
 # simulates all valid moves on clones of the game state 
 # evaluates each game state which follows a valid move
 # returns the best move
-def minimax(node, depth, heuristic_type):
+def minimax(node, depth, heuristic_type, player_color):
 	score = 0 
 	# if depth = 3 or if game over 
+	if player_color == 'white':
+		use_list = white_list 
+	else: 
+		use_list = black_list
+
 	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
-		print "REACHED DEPTH"
+		#print "REACHED DEPTH"
 		if heuristic_type == 'defensive':
-			return defensive_heuristic(len(white_list))
+			return defensive_heuristic(len(use_list))
 		else:
-			return offensive_heuristic(len(black_list))
+			return offensive_heuristic(len(use_list))
 	#print "Node type: MINIMAX" + str(type(node))
-	moves = get_possible_moves(node, 'white').possiblemoves	
+	moves = get_possible_moves(node, player_color).possiblemoves	
 	best_move = moves[0]
 	best_score = float('-inf')
 	for move in moves:
 		clone = move
-		score = min_player(clone, depth + 1, heuristic_type)
+		score = min_player(clone, depth + 1, heuristic_type, player_color)
 		#print "The score is: " + str(score) 
 		if score > best_score: 
 			best_move = move
 			best_score = score
 	return best_move
 
-def min_player(node, depth, heuristic_type):
+def min_player(node, depth, heuristic_type, player_color):
 	score = 0 
+
+	if player_color == 'white':
+		use_list = white_list 
+	else: 
+		use_list = black_list
+
 	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
-		print "REACHED DEPTH-MIN"
+		#print "REACHED DEPTH-MIN"
 		if heuristic_type == 'defensive':
-			return defensive_heuristic(len(white_list))
+			return defensive_heuristic(len(use_list))
 		else:
-			return offensive_heuristic(len(black_list))
+			return offensive_heuristic(len(use_list))
 	#print "Node type: MIN" + str(type(node))
-	moves = get_possible_moves(node, 'black').possiblemoves
+	moves = get_possible_moves(node, player_color).possiblemoves
 	best_score = float('inf')
 	for move in moves:
 		clone = move
-		score = max_player(clone, depth + 1, heuristic_type)
-		print "The score is: " + str(score)
+		score = max_player(clone, depth + 1, heuristic_type, player_color)
+		#print "The score is: " + str(score)
 		if score < best_score:
 			best_move = move 
 			best_score = score 
 	return best_score
 
-def max_player(node, depth, heuristic_type):
+def max_player(node, depth, heuristic_type, player_color):
 	score = 0 
+
+	if player_color == 'white':
+		use_list = white_list 
+	else: 
+		use_list = black_list
+
 	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
-		print "REACHED DEPTH- MAX"
+		#print "REACHED DEPTH- MAX"
 		if heuristic_type == 'defensive':
-			return offensive_heuristic(len(white_list))
+			return offensive_heuristic(len(use_list))
 		else:
-			return offensive_heuristic(len(black_list))
+			return offensive_heuristic(len(use_list))
 	#print "Node type: MAX" + str(type(node))
-	moves = get_possible_moves(node, 'white').possiblemoves
+	moves = get_possible_moves(node, player_color).possiblemoves
 	best_score = float('-inf')
 	for move in moves:
 		clone = move
-		score = min_play(clone, depth + 1, heuristic_type)
+		score = min_play(clone, depth + 1, heuristic_type, player_color)
 		if score > best_score:
 			best_move = move
 			best_score = score
@@ -262,7 +231,7 @@ def main(gridname):
 
 	print "Number of possible moves: " + str(len(new_game.possiblemoves))
 	#print minimax(gridname, node, 1, defensive, True)
-	game = minimax(new_game, 0, 'defensive')
+	game = minimax(new_game, 0, 'defensive', 'white')
 	print_grid(game.state)
 
 if __name__ == '__main__':
