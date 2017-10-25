@@ -1,5 +1,6 @@
 
 from node import Node 
+import random
 
 #global definitions:
 black_list = []
@@ -130,13 +131,12 @@ def min_player(node, depth, heuristic_type):
 	moves = get_possible_moves(node, 'black').possiblemoves
 	best_score = float('inf')
 	for move in moves:
-		# clone = move
-		# score = max_player(clone, depth + 1, heuristic_type)
-		# print "The score is: " + str(score)
-		# if score < best_score:
-		# 	best_move = move 
-		# 	best_score = score 
-		print_grid(move.state)
+		clone = move
+		score = max_player(clone, depth + 1, heuristic_type)
+		print "The score is: " + str(score)
+		if score < best_score:
+			best_move = move 
+			best_score = score 
 	return best_score
 
 def max_player(node, depth, heuristic_type):
@@ -159,10 +159,10 @@ def max_player(node, depth, heuristic_type):
 	return best_score
 
 def defensive_heuristic(num_pieces_remaining):
-	return 2 * num_pieces_remaining + random()
+	return 2 * num_pieces_remaining + random.random()
 
 def offensive_heuristic(num_opposing_remaining):
-	return 2 * (30 - num_opposing_remaining) + random()
+	return 2 * (30 - num_opposing_remaining) + random.random()
 
 def get_possible_moves(node, which_list):
 	if which_list == 'white':
