@@ -97,52 +97,57 @@ def populate_lists():
 # evaluates each game state which follows a valid move
 # returns the best move
 def minimax(node, depth, heuristic_type):
+	score = 0 
 	# if depth = 3 or if game over 
 	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
 		if heuristic_type == 'defensive':
 			return defensive_heuristic(len(white_list))
 		else:
 			return offensive_heuristic(len(black_list))
-
+	#print "Node type: MINIMAX" + str(type(node))
 	moves = get_possible_moves(node, 'white').possiblemoves
 	best_move = moves[0]
 	best_score = float('-inf')
 	for move in moves:
-		clone = move.state
+		clone = move
 		score = min_player(clone, depth + 1, heuristic_type)
+		#print "The score is: " + str(score) 
 		if score > best_score: 
 			best_move = move 
 			best_score = score
 	return best_move
 
 def min_player(node, depth, heuristic_type):
+	score = 0 
 	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
 		if heuristic_type == 'defensive':
 			return defensive_heuristic(len(white_list))
 		else:
 			return offensive_heuristic(len(black_list))
-
+	#print "Node type: MIN" + str(type(node))
 	moves = get_possible_moves(node, 'black').possiblemoves
 	best_score = float('inf')
 	for move in moves:
-		clone = move.state
+		clone = move
 		score = max_player(clone, depth + 1, heuristic_type)
-	if score < best_score:
-		best_move = move 
-		best_score = score 
+		print "The score is: " + str(score)
+		if score < best_score:
+			best_move = move 
+			best_score = score 
 	return best_score
 
 def max_player(node, depth, heuristic_type):
+	score = 0 
 	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
 		if heuristic_type == 'defensive':
 			return offensive_heuristic(len(white_list))
 		else:
 			return offensive_heuristic(len(black_list))
-
+	#print "Node type: MAX" + str(type(node))
 	moves = get_possible_moves(node, 'white').possiblemoves
 	best_score = float('-inf')
 	for move in moves:
-		clone = move.state
+		clone = move
 		score = min_play(clone, depth + 1, heuristic_type)
 		if score > best_score:
 			best_move = move
@@ -188,7 +193,6 @@ def get_possible_moves(node, which_list):
 			#print_grid(temp_grid2)
 			rightnode = Node(temp_grid2)
 	 		node.possiblemoves.append(rightnode)
-	print type(node)
 	return node
 
 def print_grid(gridname):
@@ -246,7 +250,8 @@ def main(gridname):
 
 	print "Number of possible moves: " + str(len(new_game.possiblemoves))
 	#print minimax(gridname, node, 1, defensive, True)
-	minimax(new_game, 0, 'defensive')
+	game = minimax(new_game, 0, 'defensive')
+	print_grid(game.state)
 
 if __name__ == '__main__':
 	main("new_game.txt")
