@@ -52,7 +52,7 @@ def populate_lists():
 def minimax(node, depth, heuristic_type, player_color):
 	score = 0 
 	# if depth = 3 or if game over 
-	if player_color == 'white':
+	if player_color:
 		use_list = white_list 
 	else: 
 		use_list = black_list
@@ -79,7 +79,7 @@ def minimax(node, depth, heuristic_type, player_color):
 def min_player(node, depth, heuristic_type, player_color):
 	score = 0 
 
-	if player_color == 'white':
+	if player_color:
 		use_list = white_list 
 	else: 
 		use_list = black_list
@@ -91,7 +91,9 @@ def min_player(node, depth, heuristic_type, player_color):
 		else:
 			return offensive_heuristic(len(use_list))
 	#print "Node type: MIN" + str(type(node))
-	moves = get_possible_moves(node, player_color).possiblemoves
+	opposing_player = not player_color
+	#print "opposing player is: " + str(opposing_player)
+	moves = get_possible_moves(node, opposing_player).possiblemoves
 	best_score = float('inf')
 	for move in moves:
 		clone = move
@@ -105,7 +107,7 @@ def min_player(node, depth, heuristic_type, player_color):
 def max_player(node, depth, heuristic_type, player_color):
 	score = 0 
 
-	if player_color == 'white':
+	if player_color:
 		use_list = white_list 
 	else: 
 		use_list = black_list
@@ -134,7 +136,7 @@ def offensive_heuristic(num_opposing_remaining):
 	return 2 * (30 - num_opposing_remaining) + random.random()
 
 def get_possible_moves(node, which_list):
-	if which_list == 'white':
+	if which_list:
 		use_list = white_list
 	else:
 		use_list = black_list
@@ -143,7 +145,7 @@ def get_possible_moves(node, which_list):
 		x = piece[0]
 		y = piece[1]
 
-		if which_list == 'white':
+		if which_list:
 			newy = y-1
 			newchar = 'W'
 		else:
@@ -184,7 +186,7 @@ def is_valid(x, y, action, which_list):
 	grid = read_grid()
 
 	#make sure its a valid point within (0, 0) to (9, 9)
-	if which_list is 'white':
+	if which_list:
 		if (x >= 0 and x <= 9 and y >= 0 and y <= 9):
 			if (grid[y][x]== '%' or grid[y][x] == 'W'): #if it's a border or occupied, return false right away
 				return False
@@ -216,6 +218,7 @@ def is_valid(x, y, action, which_list):
 		else:
 			return False
 
+
 def main(gridname):
 	grid = read_grid()
 
@@ -231,7 +234,9 @@ def main(gridname):
 
 	print "Number of possible moves: " + str(len(new_game.possiblemoves))
 	#print minimax(gridname, node, 1, defensive, True)
-	game = minimax(new_game, 0, 'defensive', 'white')
+
+	# False means black player, True means white player
+	game = minimax(new_game, 0, 'defensive', True)
 	print_grid(game.state)
 
 if __name__ == '__main__':
