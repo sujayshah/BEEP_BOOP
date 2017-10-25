@@ -100,12 +100,13 @@ def minimax(node, depth, heuristic_type):
 	score = 0 
 	# if depth = 3 or if game over 
 	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
+		print "REACHED DEPTH"
 		if heuristic_type == 'defensive':
 			return defensive_heuristic(len(white_list))
 		else:
 			return offensive_heuristic(len(black_list))
 	#print "Node type: MINIMAX" + str(type(node))
-	moves = get_possible_moves(node, 'white').possiblemoves
+	moves = get_possible_moves(node, 'white').possiblemoves	
 	best_move = moves[0]
 	best_score = float('-inf')
 	for move in moves:
@@ -113,13 +114,14 @@ def minimax(node, depth, heuristic_type):
 		score = min_player(clone, depth + 1, heuristic_type)
 		#print "The score is: " + str(score) 
 		if score > best_score: 
-			best_move = move 
+			best_move = move
 			best_score = score
 	return best_move
 
 def min_player(node, depth, heuristic_type):
 	score = 0 
 	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
+		print "REACHED DEPTH-MIN"
 		if heuristic_type == 'defensive':
 			return defensive_heuristic(len(white_list))
 		else:
@@ -128,17 +130,19 @@ def min_player(node, depth, heuristic_type):
 	moves = get_possible_moves(node, 'black').possiblemoves
 	best_score = float('inf')
 	for move in moves:
-		clone = move
-		score = max_player(clone, depth + 1, heuristic_type)
-		print "The score is: " + str(score)
-		if score < best_score:
-			best_move = move 
-			best_score = score 
+		# clone = move
+		# score = max_player(clone, depth + 1, heuristic_type)
+		# print "The score is: " + str(score)
+		# if score < best_score:
+		# 	best_move = move 
+		# 	best_score = score 
+		print_grid(move.state)
 	return best_score
 
 def max_player(node, depth, heuristic_type):
 	score = 0 
 	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
+		print "REACHED DEPTH- MAX"
 		if heuristic_type == 'defensive':
 			return offensive_heuristic(len(white_list))
 		else:
@@ -161,7 +165,7 @@ def offensive_heuristic(num_opposing_remaining):
 	return 2 * (30 - num_opposing_remaining) + random()
 
 def get_possible_moves(node, which_list):
-	if which_list is 'white':
+	if which_list == 'white':
 		use_list = white_list
 	else:
 		use_list = black_list
@@ -169,27 +173,35 @@ def get_possible_moves(node, which_list):
 	for piece in use_list:
 		x = piece[0]
 		y = piece[1]
-	 	if is_valid(x-1,y-1, 0, which_list): #left diagonal
+
+		if which_list == 'white':
+			newy = y-1
+			newchar = 'W'
+		else:
+			newy = y+1
+			newchar = 'B'
+
+	 	if is_valid(x-1, newy, 0, which_list): #left diagonal
 	 		#print "(" + str(x) + ", " + str(y) + ") can move left diagonal."
 	 		temp_grid0= read_grid()
 	 		temp_grid0[y][x] = ' ' #vacate old spot
-	 		temp_grid0[y-1][x-1] = 'W' #move to new spot
+	 		temp_grid0[newy][x-1] = newchar #move to new spot
 	 		#print_grid(temp_grid0)
 	 		leftnode = Node(temp_grid0)
 			node.possiblemoves.append(leftnode)
-	 	if is_valid(x, y-1, 1, which_list): #straight
+	 	if is_valid(x, newy, 1, which_list): #straight
 	 		#print "(" + str(x) + ", " + str(y) + ") can move straight."
 	 		temp_grid1 = read_grid()
 	 		temp_grid1[y][x] = ' '
-	 		temp_grid1[y-1][x] = 'W'
+	 		temp_grid1[newy][x] = newchar
 	 		#print_grid(temp_grid1)
 	 		straightnode = Node(temp_grid1)
 	 		node.possiblemoves.append(straightnode)
-	 	if is_valid(x+1, y-1, 2, which_list): #right diagonal
+	 	if is_valid(x+1, newy, 2, which_list): #right diagonal
 	 		#print "(" + str(x) + ", " + str(y) + ") can move right diagonal."
 	 		temp_grid2 = read_grid()
 			temp_grid2[y][x] = ' '
-			temp_grid2[y-1][x+1] = 'W'
+			temp_grid2[newy][x+1] = newchar
 			#print_grid(temp_grid2)
 			rightnode = Node(temp_grid2)
 	 		node.possiblemoves.append(rightnode)
