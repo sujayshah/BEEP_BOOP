@@ -1,4 +1,6 @@
 from variable import Variable
+import random
+import heapq
 
 def readFile(filename):
 	textFile = open(filename, "r")
@@ -11,19 +13,70 @@ def readFile(filename):
 
 	return flowFreeMap
 
-def smart_csp_search(grid, colorList, colorLoc, cellList):
+def smart_csp_search(grid, colorList, colorLoc, cellList, colorPaths):
 	for z in range(0, len(grid)):
 		print grid[z][0].assignment, grid[z][1].assignment, grid[z][2].assignment, grid[z][3].assignment, grid[z][4].assignment#, grid[z][5].assignment, grid[z][6].assignment, grid[z][7].assignment
 	for z in range(0, len(grid)):
 		print grid[z][0].state, grid[z][1].state, grid[z][2].state, grid[z][3].state, grid[z][4].state#, grid[z][5].assignment, grid[z][6].assignment, grid[z][7].assignment 
+
+	print colorPaths
+
+	nextStates = []
+	for i in range(0, len(colorList)):
+		nextStates.append([])
+		most_constrained_var(grid, i, colorList, colorPaths, nextStates[i])
+		print "COLORS", colorList[i]
+		# manhattan_distance_ordering(colorPaths, nextStates[i])
+
+def most_constrained_var(grid, i, colorList, colorPaths, nextStates):
+	colorX = colorPaths.get(colorList[i]+'x')[-1]
+	colorY = colorPaths.get(colorList[i]+'y')[-1]
+	leftOpen = False
+	rightOpen = False
+	upOpen = False
+	downOpen = False
+	numSameColor = 0
+	if colorX > 0:
+		if grid[colorY][colorX-1].assignment == ' ':
+			leftOpen = True
+			# numSameColor += zig_zag_check
+	if colorX < (len(grid[colorY])-1):
+		if grid[colorY][colorX+1].assignment == ' ':
+			rightOpen = True
+		if grid[colorY][colorX+1].assignment == colorList[i]:
+			numSameColor += 1
+	if colorY > 0:
+		if grid[colorY-1][colorX].assignment == ' ':
+			upOpen = True
+		if grid[colorY-1][colorX].assignment == colorList[i]:
+			numSameColor += 1
+	if colorY < (len(grid)-1):
+		if grid[colorY+1][colorX].assignment == ' ':
+			downOpen = True
+		if grid[colorY+1][colorX].assignment == colorList[i]:
+			numSameColor += 1
+
+
+	print nextStates
+
+# def zig_zag_check(grid, x, y):
+# 	if(grid[y][x].assignment == )
+
+# def manhattan_distance_ordering(colorPaths, nextStates):
+
+
+# def least_constrained_var():
+
+
+# def forward_checking():
+
 
 def dumb_csp_search(grid, colorList, colorLoc, cellList):
-
 	for z in range(0, len(grid)):
 		print grid[z][0].assignment, grid[z][1].assignment, grid[z][2].assignment, grid[z][3].assignment, grid[z][4].assignment#, grid[z][5].assignment, grid[z][6].assignment, grid[z][7].assignment
 	for z in range(0, len(grid)):
 		print grid[z][0].state, grid[z][1].state, grid[z][2].state, grid[z][3].state, grid[z][4].state#, grid[z][5].assignment, grid[z][6].assignment, grid[z][7].assignment 
-	# raw_input("Press Enter")
+	raw_input("Press Enter")
 	allPathsFound = True
 	for i in colorList:
 		startPath = colorLoc.get(i+'Start')
@@ -37,7 +90,6 @@ def dumb_csp_search(grid, colorList, colorLoc, cellList):
 			if(var.state == 0):
 				allPathsFound = False
 
-	# print allPathsFound
 	if allPathsFound == True:
 		return grid
 
@@ -46,17 +98,15 @@ def dumb_csp_search(grid, colorList, colorLoc, cellList):
 		for newAssign in cell.domain:
 			if(cell.state == 0):
 				print "NEWASSIGN ", newAssign
-				print " "
 				cell.assignment = newAssign
 				cell.state = 2
 				if neighbors(grid, cell, newAssign, colorLoc):
-					# print space.x, space.y, space.assignment
 					result = dumb_csp_search(grid, colorList, colorLoc, cellList)
 					print "SPACE RETURN", cell.x, cell.y
 					print " "
 					if(result != None):
 						return result
-				cell.assignment = '_'
+				cell.assignment = ' '
 				cell.state = 0
 				print "Newassign on fail", newAssign, colorList[-1]
 				if newAssign == colorList[-1]:
@@ -67,8 +117,8 @@ def dumb_csp_search(grid, colorList, colorLoc, cellList):
 	return None
 	# print space.x, space.y, space.assignment, space.domain, space.state
 
+
 def neighbors(grid, space, newAssign, colorLoc):
-	
 	if (numNeighbors(grid, space, newAssign, colorLoc)):
 		if(space.x > 0):
 			print "LEFT", (grid[space.y][space.x-1]).assignment
@@ -94,7 +144,9 @@ def neighbors(grid, space, newAssign, colorLoc):
 				if(numNeighbors(grid, grid[space.y+1][space.x], newAssign, colorLoc) == False):
 					return False
 
-	return True
+		return True
+
+	return False
 	
 
 def numNeighbors(grid, space, newAssign, colorLoc):
@@ -117,7 +169,6 @@ def numNeighbors(grid, space, newAssign, colorLoc):
 
 	print "numNeighbors", numNeighbors
 	if ((colorLoc.get(newAssign + 'Start') == (space.x, space.y)) or (colorLoc.get(newAssign + 'Start') == (space.x, space.y))): 
-		print "STARTCHECK", numNeighbors
 		return (numNeighbors <= 1)
 
 	return (numNeighbors <= 2)
@@ -211,7 +262,7 @@ def main(filename):
 	print colorLoc
 	
 
-# Reserved for testing path// DO NOT UNCOMMENT -- Call in other functions if needed
+# Reserved for testing solution path// DO NOT UNCOMMENT -- Call in other functions if needed
 #-------------------------------------------------------------------------
 	# yellowStart = colorLoc.get('YStart')
 	# yellowEnd = colorLoc.get('YEnd')
@@ -222,9 +273,23 @@ def main(filename):
 	# for i in colorPath:
 	# 	print i.x, i.y
 #--------------------------------------------------------------------------
-	
+
+# UNCOMMENT THESE LINES TO RUN DUMB CSP SOLVER 
+	random.shuffle(cellList)
 	grid = dumb_csp_search(grid, colorList, colorLoc, cellList)
-	# smart_csp_search(grid)
+#---------------------------------------------------------------------------
+# UNCOMMENT THESE LINES TO RUN SMART CSP SOLVER 
+	# colorPaths = {}
+	# for i in colorList:
+	# 	colorStart = colorLoc.get(i+'Start')
+	# 	colorPaths[i+'x'] = []
+	# 	colorPaths[i+'y'] = []
+	# 	colorPaths[i+'x'].append(colorStart[0])
+	# 	colorPaths[i+'y'].append(colorStart[1])
+
+	# grid = smart_csp_search(grid, colorList, colorLoc, cellList, colorPaths)
+
+	return grid
 
 if __name__ == "__main__" : 
 	main("input55.txt")
