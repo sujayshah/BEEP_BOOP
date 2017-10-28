@@ -24,19 +24,19 @@ def smart_csp_search(grid, colorList, colorLoc, cellList, colorPaths, nextStates
 		most_constrained_var(grid, i, colorList, colorLoc, colorPaths, nextStates)
 		print "NEXTSTATES", nextStates.queue
 
-	while not nextStates.empty():
-		curAssign = nextStates.get()
-		curDist = curAssign[1][0]
-		curX = curAssign[1][1]
-		curY = curAssign[1][2]
-		curVal = curAssign[1][3]
-		print "CUR ASSIGN", curAssign
+	
+	curAssign = nextStates.get()
+	curDist = curAssign[1][0]
+	curX = curAssign[1][1]
+	curY = curAssign[1][2]
+	curVal = curAssign[1][3]
+	print "CUR ASSIGN", curAssign
 
-	# grid[curY][curX].assignment = curVal
-	# grid[curY][curX].state = 2
+	grid[curY][curX].assignment = curVal
+	grid[curY][curX].state = 2
 
-	# for z in range(0, len(grid)):
-	# 	print ' '.join(grid[z][y].assignment for y in range(0, len(grid[z])))
+	for z in range(0, len(grid)):
+		print ' '.join(grid[z][y].assignment for y in range(0, len(grid[z])))
 
 
 # This function finds the availability of different paths through neighboring cells
@@ -46,19 +46,19 @@ def most_constrained_var(grid, i, colorList, colorLoc, colorPaths, nextStates):
 	up = down = left = right = False
 	numOpen = 0
 	if colorX > 0:
-		if grid[colorY][colorX-1].assignment == ' ':
+		if grid[colorY][colorX-1].assignment == '_':
 			numOpen += 1
 			left = True
 	if colorX < (len(grid[colorY])-1):
-		if grid[colorY][colorX+1].assignment == ' ':
+		if grid[colorY][colorX+1].assignment == '_':
 			numOpen += 1
 			right = True
 	if colorY > 0:
-		if grid[colorY-1][colorX].assignment == ' ':
+		if grid[colorY-1][colorX].assignment == '_':
 			numOpen += 1
 			up = True
 	if colorY < (len(grid)-1):
-		if grid[colorY+1][colorX].assignment == ' ':
+		if grid[colorY+1][colorX].assignment == '_':
 			numOpen += 1
 			down = True
 
@@ -95,7 +95,7 @@ def dumb_csp_search(grid, colorList, colorLoc, cellList):
 		return -1
 	for z in range(0, len(grid)):
 		print ' '.join(grid[z][y].assignment for y in range(0, len(grid[z])))
-	# raw_input("Press Enter")
+	raw_input("Press Enter")
 	allPathsFound = True
 	for i in colorList:
 		startPath = colorLoc.get(i+'Start')
@@ -126,7 +126,7 @@ def dumb_csp_search(grid, colorList, colorLoc, cellList):
 						return -1
 					if(result != None):
 						return result
-				cell.assignment = ' '
+				cell.assignment = '_'
 				cell.state = 0
 				print "Newassign on fail", newAssign, cell.domain[-1]
 				if newAssign == cell.domain[-1]:
@@ -197,7 +197,7 @@ def findPath(grid, start, goal):
 	visited = []
 	valid = 0
 
-	if (start.x < 0) or (start.y < 0) or (start.x >= len(grid)) or (start.y >= len(grid[0])) or start.assignment == ' ':
+	if (start.x < 0) or (start.y < 0) or (start.x >= len(grid)) or (start.y >= len(grid[0])) or start.assignment == '_':
 		return None
 	if(start.x == goal.x and start.y == goal.y):
 		return path
@@ -258,7 +258,7 @@ def main(filename):
 					colorLoc[s[c]+'Start'] = (c, y)
 				
 				if s[c] == '_':
-					var = Variable(c, y, ' ', None, None)
+					var = Variable(c, y, '_', None, None)
 					var.domain = colorList
 					var.state = 0
 					cellList.append(var)
