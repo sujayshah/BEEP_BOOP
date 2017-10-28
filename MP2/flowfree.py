@@ -79,13 +79,24 @@ def most_constrained_var(grid, i, colorList, colorPaths, nextStates):
 # def manhattan_distance_ordering(colorPaths, nextStates):
 # def forward_checking():
 
+def iterative_count():
+	global iterations
+	iterations = 0
+
+def increment_count():
+	global iterations
+	iterations += 1
 
 def dumb_csp_search(grid, colorList, colorLoc, cellList):
+	increment_count()
+	print "ITERATIONS", iterations
+	if iterations >= 1000:
+		return -1
 	for z in range(0, len(grid)):
 		print grid[z][0].assignment, grid[z][1].assignment, grid[z][2].assignment, grid[z][3].assignment, grid[z][4].assignment#, grid[z][5].assignment, grid[z][6].assignment, grid[z][7].assignment
 	for z in range(0, len(grid)):
 		print grid[z][0].state, grid[z][1].state, grid[z][2].state, grid[z][3].state, grid[z][4].state#, grid[z][5].assignment, grid[z][6].assignment, grid[z][7].assignment 
-	raw_input("Press Enter")
+	# raw_input("Press Enter")
 	allPathsFound = True
 	for i in colorList:
 		startPath = colorLoc.get(i+'Start')
@@ -112,6 +123,8 @@ def dumb_csp_search(grid, colorList, colorLoc, cellList):
 					result = dumb_csp_search(grid, colorList, colorLoc, cellList)
 					print "SPACE RETURN", cell.x, cell.y
 					print " "
+					if(result == -1):
+						return -1
 					if(result != None):
 						return result
 				cell.assignment = ' '
@@ -313,7 +326,7 @@ def main(filename):
 			i.domain.append(z)
 		random.shuffle(i.domain)
 		print i.x, i.y, i.domain
-
+	iterative_count()
 	grid = dumb_csp_search(grid, colorList, colorLoc, cellList)
 #---------------------------------------------------------------------------
 # UNCOMMENT THESE LINES TO RUN SMART CSP SOLVER 
