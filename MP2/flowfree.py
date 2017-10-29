@@ -14,17 +14,36 @@ def readFile(filename):
 	return flowFreeMap
 
 def smart_csp_search(grid, colorList, colorLoc, cellList, colorPaths, nextStates):
+	# print out the current maze
 	for z in range(0, len(grid)):
 		print ' '.join(grid[z][y].assignment for y in range(0, len(grid[z]))) 
-
 	print colorPaths
-
+	
+	# check whether a valid solution is found that satisfy...
+	# 1) All colors from their starting cell have a clear path to the solution with no branching
+	allPathsFound = True
+	for i in colorList:
+		startPath = colorLoc.get(i+'Start')
+		endPath = colorLoc.get(i+'End')
+		if (findPath(grid, grid[startPath[1]][startPath[0]], grid[endPath[1]][endPath[0]]) == None):
+			allPathsFound = False
+	# 2) All cells have been filled in
+	for i in range(0, len(grid)):
+		for var in grid[i]:
+			if(var.state == 0):
+				allPathsFound = False
+	# Return the grid if a solution has been found recursively
+	if allPathsFound == True:
+		return grid
+	
+	# Use this to add the next constrined variables to the priority queue
 	for i in range(0, len(colorList)):
 		print "COLORS", colorList[i]
 		most_constrained_var(grid, i, colorList, colorLoc, colorPaths, nextStates)
 		print "NEXTSTATES", nextStates.queue
 
-	
+	# Pick the next cell to expand from the priority queue according to whichever cell variable is most constrained in priority queue 
+	# and has best value according to manhattan distance from goal heuristic
 	curAssign = nextStates.get()
 	curDist = curAssign[1][0]
 	curX = curAssign[1][1]
@@ -32,8 +51,13 @@ def smart_csp_search(grid, colorList, colorLoc, cellList, colorPaths, nextStates
 	curVal = curAssign[1][3]
 	print "CUR ASSIGN", curAssign
 
-	grid[curY][curX].assignment = curVal
-	grid[curY][curX].state = 2
+	# check to make sure value has not been assigned
+	if grid[curY][curX].assignment == '_':
+		grid[curY][curX].assignment = curVal
+		grid[curY][curX].state = 2
+		if neighbors(grid, grid[curY][curX], curVal, colorLoc):
+			colorPaths[curVal+'x'].append(curX)
+			colorPaths[curVal+'y'].append(curY)
 
 	for z in range(0, len(grid)):
 		print ' '.join(grid[z][y].assignment for y in range(0, len(grid[z])))
@@ -75,8 +99,6 @@ def manhattan_distance_ordering(i, colorLoc, x, y):
 	endPath = colorLoc.get(i+'End')
 	return abs(endPath[0]-x) + abs(endPath[1]-y)
 
-
-# def zig_zag_check(grid, x, y):
 # def forward_checking():
 
 ##################################################################
@@ -95,7 +117,7 @@ def dumb_csp_search(grid, colorList, colorLoc, cellList):
 		return -1
 	for z in range(0, len(grid)):
 		print ' '.join(grid[z][y].assignment for y in range(0, len(grid[z])))
-	raw_input("Press Enter")
+	# raw_input("Press Enter")
 	allPathsFound = True
 	for i in colorList:
 		startPath = colorLoc.get(i+'Start')
@@ -239,7 +261,6 @@ def findPath(grid, start, goal):
 		start = path[-1]
 
 	return path
-
 
 def main(filename):
 	flowFree = readFile(filename)
