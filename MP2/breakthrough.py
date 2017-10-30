@@ -45,6 +45,9 @@ def populate_lists():
 
 # read a grid and check to see if white/black has made it to the other end
 def goal_check(gridname):
+	if gridname == None: 
+		return False
+
 	for xpos in range(10):
 		if gridname[1][xpos] == 'W' or gridname[8][xpos] == 'B':
 			return True
@@ -60,6 +63,8 @@ def goal_check(gridname):
 def minimax(node, depth, heuristic_type, player_color):
 	score = 0 
 	# if depth = 3 or if game over 
+	print "PASS TO NODE"
+	print_grid(node.state)
 	if player_color:
 		use_list = white_list 
 	else: 
@@ -71,17 +76,17 @@ def minimax(node, depth, heuristic_type, player_color):
 			return defensive_heuristic(len(use_list))
 		else:
 			return offensive_heuristic(len(use_list))
-	#print "Node type: MINIMAX" + str(type(node))
 	moves = get_possible_moves(node, player_color).possiblemoves	
 	best_move = moves[0]
 	best_score = float('-inf')
 	for move in moves:
 		clone = move
 		score = min_player(clone, depth + 1, heuristic_type, player_color)
-		#print "The score is: " + str(score) 
+		# #print "The score is: " + str(score) 
 		if score > best_score: 
-			best_move = move
-			best_score = score
+		 	best_move = move
+		 	best_score = score
+
 	return best_move
 
 def min_player(node, depth, heuristic_type, player_color):
@@ -167,7 +172,6 @@ def get_possible_moves(node, which_list):
 	 		temp_grid0= make_grid()
 	 		temp_grid0[y][x] = ' ' #vacate old spot
 	 		temp_grid0[newy][x-1] = newchar #move to new spot
-	 		#print_grid(temp_grid0)
 	 		leftnode = Node(temp_grid0)
 			node.possiblemoves.append(leftnode)
 	 	if is_valid(x, newy, 1, which_list): #straight
@@ -325,27 +329,41 @@ def main(gridname):
 	grid = make_grid()
 
 	populate_lists()
-	print "Black list:" + str(black_list)
-	print "Num black pieces: " + str(len(black_list))
-	print "White list:" + str(white_list)
-	print "Num white pieces: " + str(len(white_list))
+	# print "Black list:" + str(black_list)
+	# print "Num black pieces: " + str(len(black_list))
+	# print "White list:" + str(white_list)
+	# print "Num white pieces: " + str(len(white_list))
 	
+	# new_game = Node(grid)
+	# get_possible_moves(new_game, 'white')
+	# #print grid
+
+	# print "Number of possible moves: " + str(len(new_game.possiblemoves))
+	# #print minimax(gridname, node, 1, defensive, True)
+
+	# # False means black player, True means white player
+	# game = minimax(new_game, 0, 'defensive', True)
+	# print type(game)
+	# print_grid(game.state)
+	# if goal_check(game.state):
+	# 	print "game's over"
+	# else:
+	# 	print "game's not over"
+
+	player = True
 	new_game = Node(grid)
-	get_possible_moves(new_game, 'white')
-	#print grid
-
-	print "Number of possible moves: " + str(len(new_game.possiblemoves))
-	#print minimax(gridname, node, 1, defensive, True)
-
-	# False means black player, True means white player
-	game = minimax(new_game, 0, 'defensive', True)
+	game = minimax(new_game, 0, 'defensive', player)
 	print_grid(game.state)
-	if goal_check(game.state):
-		print "game's over"
-	else:
-		print "game's not over"
-	while
+	player = False
+	count = 0 
 
+	while (count < 3):
+		print str(player)
+		game2 = minimax(game, 0, 'defensive', player) #white goes first
+		print_grid(game2.state)
+		game = Node(game2.state)
+		player = not player
+		count += 1
 
 if __name__ == '__main__':
 	main("new_game.txt")
