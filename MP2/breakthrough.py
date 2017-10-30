@@ -167,27 +167,33 @@ def get_possible_moves(node, which_list):
 			newy = y+1
 			newchar = 'B'
 
-	 	if is_valid(x-1, newy, 0, which_list): #left diagonal
-	 		#print "(" + str(x) + ", " + str(y) + ") can move left diagonal."
-	 		temp_grid0= make_grid()
+		check_grid = node.state[:]
+		print "check_grid looks like: "
+		print_grid(check_grid)
+	 	if is_valid(check_grid, x-1, newy, 0, which_list): #left diagonal
+	 		print "(" + str(x) + ", " + str(y) + ") can move left diagonal."
+	 		temp_grid0= node.state[:]
+	 		print_grid(temp_grid0)
 	 		temp_grid0[y][x] = ' ' #vacate old spot
 	 		temp_grid0[newy][x-1] = newchar #move to new spot
 	 		leftnode = Node(temp_grid0)
 			node.possiblemoves.append(leftnode)
-	 	if is_valid(x, newy, 1, which_list): #straight
-	 		#print "(" + str(x) + ", " + str(y) + ") can move straight."
-	 		temp_grid1 = make_grid()
+
+	 	if is_valid(check_grid, x, newy, 1, which_list): #straight
+	 		print "(" + str(x) + ", " + str(y) + ") can move straight."
+	 		temp_grid1= node.state[:]
 	 		temp_grid1[y][x] = ' '
 	 		temp_grid1[newy][x] = newchar
-	 		#print_grid(temp_grid1)
+	 		print_grid(temp_grid1)
 	 		straightnode = Node(temp_grid1)
 	 		node.possiblemoves.append(straightnode)
-	 	if is_valid(x+1, newy, 2, which_list): #right diagonal
-	 		#print "(" + str(x) + ", " + str(y) + ") can move right diagonal."
-	 		temp_grid2 = make_grid()
+
+	 	if is_valid(check_grid, x+1, newy, 2, which_list): #right diagonal
+	 		print "(" + str(x) + ", " + str(y) + ") can move right diagonal."
+	 		temp_grid2= node.state[:]
 			temp_grid2[y][x] = ' '
 			temp_grid2[newy][x+1] = newchar
-			#print_grid(temp_grid2)
+			print_grid(temp_grid2)
 			rightnode = Node(temp_grid2)
 	 		node.possiblemoves.append(rightnode)
 	return node
@@ -196,9 +202,7 @@ def print_grid(gridname):
 	print('\n'.join([''.join(['{:1}'.format(item) for item in row]) for row in gridname]))
 
 # 0 = left diagonal, 1 = straight, 2 = right diagonal
-def is_valid(x, y, action, which_list):
-	grid = make_grid()
-
+def is_valid(grid, x, y, action, which_list):
 	#make sure its a valid point within (0, 0) to (9, 9)
 	if which_list:
 		if (x >= 0 and x <= 9 and y >= 0 and y <= 9):
@@ -353,17 +357,18 @@ def main(gridname):
 	player = True
 	new_game = Node(grid)
 	game = minimax(new_game, 0, 'defensive', player)
-	print_grid(game.state)
+	#print_grid(game.state)
 	player = False
 	count = 0 
 
-	while (count < 3):
-		print str(player)
-		game2 = minimax(game, 0, 'defensive', player) #white goes first
-		print_grid(game2.state)
-		game = Node(game2.state)
-		player = not player
-		count += 1
+	# while (count < 2):
+	# 	print str(player)
+	# 	game2 = minimax(game, 0, 'defensive', player) #white goes first
+	# 	print "update:"
+	# 	print_grid(game2.state)
+	# 	game = Node(game2.state)
+	# 	player = not player
+	# 	count += 1
 
 if __name__ == '__main__':
 	main("new_game.txt")
