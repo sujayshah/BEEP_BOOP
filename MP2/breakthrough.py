@@ -1,6 +1,8 @@
 
 from node import Node 
 import random
+import sys
+import copy
 
 #global definitions:
 black_list = []
@@ -76,11 +78,15 @@ def minimax(node, depth, heuristic_type, player_color):
 			return defensive_heuristic(len(use_list))
 		else:
 			return offensive_heuristic(len(use_list))
-	moves = get_possible_moves(node, player_color).possiblemoves	
+	moves = get_possible_moves(node, player_color).possiblemoves
+	#this is where it gets messed up 	
 	best_move = moves[0]
 	best_score = float('-inf')
 	for move in moves:
 		clone = move
+		print "analyzing: " 
+		#is already messed up here
+		print_grid(move.state)
 		score = min_player(clone, depth + 1, heuristic_type, player_color)
 		# #print "The score is: " + str(score) 
 		if score > best_score: 
@@ -151,12 +157,23 @@ def offensive_heuristic(num_opposing_remaining):
 	return 2 * (30 - num_opposing_remaining) + random.random()
 
 def get_possible_moves(node, which_list):
+	global white_list
+	global black_list
+	newy = 0 
 	if which_list:
 		use_list = white_list
 	else:
 		use_list = black_list
 
+
+	temp_list = []
+	check_grid = copy.deepcopy(node.state)
+		
 	for piece in use_list:
+		print "check_grid looks like: " 
+		print_grid(check_grid)
+
+		updateflag = False
 		x = piece[0]
 		y = piece[1]
 
@@ -167,35 +184,46 @@ def get_possible_moves(node, which_list):
 			newy = y+1
 			newchar = 'B'
 
-		check_grid = node.state[:]
-		print "check_grid looks like: "
-		print_grid(check_grid)
+		
+		#when moving pieces need to update the location in the list
 	 	if is_valid(check_grid, x-1, newy, 0, which_list): #left diagonal
 	 		print "(" + str(x) + ", " + str(y) + ") can move left diagonal."
-	 		temp_grid0= node.state[:]
-	 		print_grid(temp_grid0)
+	 		temp_grid0 = copy.deepcopy(check_grid)
+	 		#print "id is: " + str(id(temp_grid0))
+	 		#print_grid(temp_grid0)
 	 		temp_grid0[y][x] = ' ' #vacate old spot
 	 		temp_grid0[newy][x-1] = newchar #move to new spot
+	 		updateflag = True
+	 		temp_list.append((x-1, y))
 	 		leftnode = Node(temp_grid0)
 			node.possiblemoves.append(leftnode)
 
 	 	if is_valid(check_grid, x, newy, 1, which_list): #straight
 	 		print "(" + str(x) + ", " + str(y) + ") can move straight."
-	 		temp_grid1= node.state[:]
+	 		temp_grid1= copy.deepcopy(check_grid)
 	 		temp_grid1[y][x] = ' '
 	 		temp_grid1[newy][x] = newchar
+	 		updateflag = True
+	 		temp_list.append((x, newy))
 	 		print_grid(temp_grid1)
 	 		straightnode = Node(temp_grid1)
 	 		node.possiblemoves.append(straightnode)
-
+	 		
 	 	if is_valid(check_grid, x+1, newy, 2, which_list): #right diagonal
 	 		print "(" + str(x) + ", " + str(y) + ") can move right diagonal."
-	 		temp_grid2= node.state[:]
-			temp_grid2[y][x] = ' '
+	 		temp_grid2= copy.deepcopy(check_grid)
+			temp_grid2[y][x] = ''
 			temp_grid2[newy][x+1] = newchar
+			updateflag = True
+	 		temp_list.append((x+1, newy))
 			print_grid(temp_grid2)
 			rightnode = Node(temp_grid2)
 	 		node.possiblemoves.append(rightnode)
+
+	if updateflag:
+	 	use_list.remove(piece)
+	 	use_list.append(temp_list)
+	 	
 	return node
 
 def print_grid(gridname):
@@ -204,6 +232,9 @@ def print_grid(gridname):
 # 0 = left diagonal, 1 = straight, 2 = right diagonal
 def is_valid(grid, x, y, action, which_list):
 	#make sure its a valid point within (0, 0) to (9, 9)
+	global black_list
+	global white_list
+
 	if which_list:
 		if (x >= 0 and x <= 9 and y >= 0 and y <= 9):
 			if (grid[y][x]== '%' or grid[y][x] == 'W'): #if it's a border or occupied, return false right away
@@ -330,6 +361,7 @@ def max_player_alpha(node, depth, heuristic_type, player_color, alpha, beta):
 	return best_score
 
 def main(gridname):
+	sys.stdout = open ("results.txt", "w")
 	grid = make_grid()
 
 	populate_lists()
