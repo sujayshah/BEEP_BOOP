@@ -77,6 +77,7 @@ def minimax(node, depth, heuristic_type, player_color):
 		else:
 			return offensive_heuristic(len(use_list))
 	moves = get_possible_moves(node, player_color).possiblemoves
+	print "moves:" + str(len(moves))
 	best_move = moves[0]
 	best_score = float('-inf')
 	for move in moves:
@@ -159,6 +160,7 @@ def get_possible_moves(node, which_list):
 	else:
 		use_list = black_list
 
+	print "currently analyzing: " + str(which_list) + " with length " + str(len(use_list))
 
 	temp_list = []
 	check_grid = copy.deepcopy(node.state)
@@ -177,9 +179,8 @@ def get_possible_moves(node, which_list):
 
 		#when moving pieces need to update the location in the list
 	 	if is_valid(check_grid, x-1, newy, 0, which_list): #left diagonal
-	 		#print "(" + str(x) + ", " + str(y) + ") can move left diagonal."
+	 		print "(" + str(x) + ", " + str(y) + ") can move left diagonal."
 	 		temp_grid0 = copy.deepcopy(check_grid)
-	 		#print "id is: " + str(id(temp_grid0))
 	 		#print_grid(temp_grid0)
 	 		temp_grid0[y][x] = ' ' #vacate old spot
 	 		temp_grid0[newy][x-1] = newchar #move to new spot
@@ -189,7 +190,7 @@ def get_possible_moves(node, which_list):
 			node.possiblemoves.append(leftnode)
 
 	 	if is_valid(check_grid, x, newy, 1, which_list): #straight
-	 		#print "(" + str(x) + ", " + str(y) + ") can move straight."
+	 		print "(" + str(x) + ", " + str(y) + ") can move straight."
 	 		temp_grid1= copy.deepcopy(check_grid)
 	 		temp_grid1[y][x] = ' '
 	 		temp_grid1[newy][x] = newchar
@@ -200,7 +201,7 @@ def get_possible_moves(node, which_list):
 	 		node.possiblemoves.append(straightnode)
 	 		
 	 	if is_valid(check_grid, x+1, newy, 2, which_list): #right diagonal
-	 		#print "(" + str(x) + ", " + str(y) + ") can move right diagonal."
+	 		print "(" + str(x) + ", " + str(y) + ") can move right diagonal."
 	 		temp_grid2= copy.deepcopy(check_grid)
 			temp_grid2[y][x] = ''
 			temp_grid2[newy][x+1] = newchar
@@ -209,10 +210,14 @@ def get_possible_moves(node, which_list):
 			#print_grid(temp_grid2)
 			rightnode = Node(temp_grid2)
 	 		node.possiblemoves.append(rightnode)
+	updateflag = False
 
 	if updateflag:
 	 	use_list.remove(piece)
+	 	print "removing: " + str(piece)
 	 	use_list = use_list + temp_list
+
+	updateflag = False
 
 	return node
 
@@ -224,6 +229,7 @@ def is_valid(grid, x, y, action, which_list):
 	#make sure its a valid point within (0, 0) to (9, 9)
 	global black_list
 	global white_list
+	#print "black: " + str(len(black_list)) + " white: " + str(len(white_list))
 
 	if which_list:
 		if (x >= 0 and x <= 9 and y >= 0 and y <= 9):
@@ -235,6 +241,7 @@ def is_valid(grid, x, y, action, which_list):
 				else:
 					if (grid[y][x] == 'B' and (action == 0 or action ==2)): #if it's occupied by black and you moved straight
 						black_list.remove((x, y))
+						print "shortening black"
 						return True
 					else:
 						return False
@@ -384,7 +391,7 @@ def main(gridname):
 	count = 0 
 
 	while (count < 2):
-		print str(player)
+		print_grid(game.state)
 		game2 = minimax(game, 0, 'defensive', player) #white goes first
 		print "update:"
 		print_grid(game2.state)
