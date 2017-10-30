@@ -65,8 +65,6 @@ def goal_check(gridname):
 def minimax(node, depth, heuristic_type, player_color):
 	score = 0 
 	# if depth = 3 or if game over 
-	print "PASS TO NODE"
-	print_grid(node.state)
 	if player_color:
 		use_list = white_list 
 	else: 
@@ -79,14 +77,10 @@ def minimax(node, depth, heuristic_type, player_color):
 		else:
 			return offensive_heuristic(len(use_list))
 	moves = get_possible_moves(node, player_color).possiblemoves
-	#this is where it gets messed up 	
 	best_move = moves[0]
 	best_score = float('-inf')
 	for move in moves:
 		clone = move
-		print "analyzing: " 
-		#is already messed up here
-		print_grid(move.state)
 		score = min_player(clone, depth + 1, heuristic_type, player_color)
 		# #print "The score is: " + str(score) 
 		if score > best_score: 
@@ -168,11 +162,8 @@ def get_possible_moves(node, which_list):
 
 	temp_list = []
 	check_grid = copy.deepcopy(node.state)
-		
+	
 	for piece in use_list:
-		print "check_grid looks like: " 
-		print_grid(check_grid)
-
 		updateflag = False
 		x = piece[0]
 		y = piece[1]
@@ -184,10 +175,9 @@ def get_possible_moves(node, which_list):
 			newy = y+1
 			newchar = 'B'
 
-		
 		#when moving pieces need to update the location in the list
 	 	if is_valid(check_grid, x-1, newy, 0, which_list): #left diagonal
-	 		print "(" + str(x) + ", " + str(y) + ") can move left diagonal."
+	 		#print "(" + str(x) + ", " + str(y) + ") can move left diagonal."
 	 		temp_grid0 = copy.deepcopy(check_grid)
 	 		#print "id is: " + str(id(temp_grid0))
 	 		#print_grid(temp_grid0)
@@ -199,31 +189,31 @@ def get_possible_moves(node, which_list):
 			node.possiblemoves.append(leftnode)
 
 	 	if is_valid(check_grid, x, newy, 1, which_list): #straight
-	 		print "(" + str(x) + ", " + str(y) + ") can move straight."
+	 		#print "(" + str(x) + ", " + str(y) + ") can move straight."
 	 		temp_grid1= copy.deepcopy(check_grid)
 	 		temp_grid1[y][x] = ' '
 	 		temp_grid1[newy][x] = newchar
 	 		updateflag = True
 	 		temp_list.append((x, newy))
-	 		print_grid(temp_grid1)
+	 		#print_grid(temp_grid1)
 	 		straightnode = Node(temp_grid1)
 	 		node.possiblemoves.append(straightnode)
 	 		
 	 	if is_valid(check_grid, x+1, newy, 2, which_list): #right diagonal
-	 		print "(" + str(x) + ", " + str(y) + ") can move right diagonal."
+	 		#print "(" + str(x) + ", " + str(y) + ") can move right diagonal."
 	 		temp_grid2= copy.deepcopy(check_grid)
 			temp_grid2[y][x] = ''
 			temp_grid2[newy][x+1] = newchar
 			updateflag = True
 	 		temp_list.append((x+1, newy))
-			print_grid(temp_grid2)
+			#print_grid(temp_grid2)
 			rightnode = Node(temp_grid2)
 	 		node.possiblemoves.append(rightnode)
 
 	if updateflag:
 	 	use_list.remove(piece)
-	 	use_list.append(temp_list)
-	 	
+	 	use_list = use_list + temp_list
+
 	return node
 
 def print_grid(gridname):
@@ -389,18 +379,18 @@ def main(gridname):
 	player = True
 	new_game = Node(grid)
 	game = minimax(new_game, 0, 'defensive', player)
-	#print_grid(game.state)
+	print_grid(game.state)
 	player = False
 	count = 0 
 
-	# while (count < 2):
-	# 	print str(player)
-	# 	game2 = minimax(game, 0, 'defensive', player) #white goes first
-	# 	print "update:"
-	# 	print_grid(game2.state)
-	# 	game = Node(game2.state)
-	# 	player = not player
-	# 	count += 1
+	while (count < 2):
+		print str(player)
+		game2 = minimax(game, 0, 'defensive', player) #white goes first
+		print "update:"
+		print_grid(game2.state)
+		game = Node(game2.state)
+		player = not player
+		count += 1
 
 if __name__ == '__main__':
 	main("new_game.txt")
