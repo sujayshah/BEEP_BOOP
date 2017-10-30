@@ -12,7 +12,7 @@ white_list = []
 # This function reads in the grid from the text file and generates the 
 # 2D array to traverse through. NOTE: to access (x,y) locations in the maze
 # you must call it as grid[y][0][x]. 
-def read_grid():
+def make_grid():
 	grid = [[' ' for x in range(10)] for y in range(10)]
 	for numy in range(10):
 		for numx in range(10):
@@ -32,7 +32,7 @@ def read_grid():
 # This function adds the (x,y) positions of the white and black pieces to their respective
 # lists. 
 def populate_lists():
-	grid = read_grid()
+	grid = make_grid()
 	global black_list
 	global white_list
 
@@ -43,6 +43,14 @@ def populate_lists():
 			if grid[ypos][xpos] == 'W':
 				white_list.append((xpos, ypos))
 
+# read a grid and check to see if white/black has made it to the other end
+def goal_check(gridname):
+	for xpos in range(10):
+		if gridname[1][xpos] == 'W' or gridname[8][xpos] == 'B':
+			return True
+	
+	return False
+		
 					
 # minimax is given a game state
 # obtains valid moves from the game state 
@@ -123,7 +131,7 @@ def max_player(node, depth, heuristic_type, player_color):
 	best_score = float('-inf')
 	for move in moves:
 		clone = move
-		score = min_play(clone, depth + 1, heuristic_type, player_color)
+		score = min_player(clone, depth + 1, heuristic_type, player_color)
 		if score > best_score:
 			best_move = move
 			best_score = score
@@ -131,6 +139,8 @@ def max_player(node, depth, heuristic_type, player_color):
 
 def defensive_heuristic(num_pieces_remaining):
 	return 2 * num_pieces_remaining + random.random()
+	#offensive heuristic 2 should just focus on getting to the other side
+	#pass in (x,y) values of black or white values 
 
 def offensive_heuristic(num_opposing_remaining):
 	return 2 * (30 - num_opposing_remaining) + random.random()
@@ -154,7 +164,7 @@ def get_possible_moves(node, which_list):
 
 	 	if is_valid(x-1, newy, 0, which_list): #left diagonal
 	 		#print "(" + str(x) + ", " + str(y) + ") can move left diagonal."
-	 		temp_grid0= read_grid()
+	 		temp_grid0= make_grid()
 	 		temp_grid0[y][x] = ' ' #vacate old spot
 	 		temp_grid0[newy][x-1] = newchar #move to new spot
 	 		#print_grid(temp_grid0)
@@ -162,7 +172,7 @@ def get_possible_moves(node, which_list):
 			node.possiblemoves.append(leftnode)
 	 	if is_valid(x, newy, 1, which_list): #straight
 	 		#print "(" + str(x) + ", " + str(y) + ") can move straight."
-	 		temp_grid1 = read_grid()
+	 		temp_grid1 = make_grid()
 	 		temp_grid1[y][x] = ' '
 	 		temp_grid1[newy][x] = newchar
 	 		#print_grid(temp_grid1)
@@ -170,7 +180,7 @@ def get_possible_moves(node, which_list):
 	 		node.possiblemoves.append(straightnode)
 	 	if is_valid(x+1, newy, 2, which_list): #right diagonal
 	 		#print "(" + str(x) + ", " + str(y) + ") can move right diagonal."
-	 		temp_grid2 = read_grid()
+	 		temp_grid2 = make_grid()
 			temp_grid2[y][x] = ' '
 			temp_grid2[newy][x+1] = newchar
 			#print_grid(temp_grid2)
@@ -183,7 +193,7 @@ def print_grid(gridname):
 
 # 0 = left diagonal, 1 = straight, 2 = right diagonal
 def is_valid(x, y, action, which_list):
-	grid = read_grid()
+	grid = make_grid()
 
 	#make sure its a valid point within (0, 0) to (9, 9)
 	if which_list:
@@ -218,9 +228,101 @@ def is_valid(x, y, action, which_list):
 		else:
 			return False
 
+# The same as minimax but branches of the search tree can be eliminated
+# alpha and beta are the upper and the lower cutoff limits for when to stop searching
+# alpha = the value of the MAX choice we have found so far at any point for MAX
+# beta = the value of the  MIN choice we have found so far at any point for MIN
+# a/b search updates the values of a/b as it goes along and prunes the remaining branches at a node 
+# AS SOON AS THE VALUE OF THE CURRENT NODE IS KNWON TO BEWORSE THAN THE CURRENT A/B 
+def alphabeta_search(node, depth, heuristic_type, player_color, alpha, beta):
+	score = 0 
+	# if depth = 3 or if game over 
+	if player_color:
+		use_list = white_list 
+	else: 
+		use_list = black_list
+
+	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
+		#print "REACHED DEPTH"
+		if heuristic_type == 'defensive':
+			return defensive_heuristic(len(use_list))
+		else:
+			return offensive_heuristic(len(use_list))
+	#print "Node type: MINIMAX" + str(type(node))
+	moves = get_possible_moves(node, player_color).possiblemoves	
+	best_move = moves[0]
+	best_score = float('-inf')
+	for move in moves:
+		clone = move
+		score = min_player_alpha(clone, depth + 1, heuristic_type, player_color, alpha, beta)
+		#print "The score is: " + str(score) 
+		if score > best_score: 
+			best_move = move
+			best_score = score
+		
+	return best_move
+
+def min_player_alpha(node, depth, heuristic_type, player_color, alpha, beta):
+	score = 0 
+
+	if player_color:
+		use_list = white_list 
+	else: 
+		use_list = black_list
+
+	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
+		#print "REACHED DEPTH-MIN"
+		if heuristic_type == 'defensive':
+			return defensive_heuristic(len(use_list))
+		else:
+			return offensive_heuristic(len(use_list))
+	#print "Node type: MIN" + str(type(node))
+	opposing_player = not player_color
+	#print "opposing player is: " + str(opposing_player)
+	moves = get_possible_moves(node, opposing_player).possiblemoves
+	best_score = float('inf')
+	for move in moves:
+		clone = move
+		score = max_player_alpha(clone, depth + 1, heuristic_type, player_color, alpha, beta)
+		#print "The score is: " + str(score)
+		if score < best_score:
+			best_move = move 
+			best_score = score 
+		beta = min(beta, best_score)
+		if beta <= alpha:
+			break
+	return best_score
+
+def max_player_alpha(node, depth, heuristic_type, player_color, alpha, beta):
+	score = 0 
+
+	if player_color:
+		use_list = white_list 
+	else: 
+		use_list = black_list
+
+	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
+		#print "REACHED DEPTH- MAX"
+		if heuristic_type == 'defensive':
+			return offensive_heuristic(len(use_list))
+		else:
+			return offensive_heuristic(len(use_list))
+	#print "Node type: MAX" + str(type(node))
+	moves = get_possible_moves(node, player_color).possiblemoves
+	best_score = float('-inf')
+	for move in moves:
+		clone = move
+		score = min_player_alpha(clone, depth + 1, heuristic_type, player_color, alpha, beta)
+		if score > best_score:
+			best_move = move
+			best_score = score
+		alpha = max(alpha, best_score)
+		if beta <= alpha:
+			break
+	return best_score
 
 def main(gridname):
-	grid = read_grid()
+	grid = make_grid()
 
 	populate_lists()
 	print "Black list:" + str(black_list)
@@ -238,6 +340,12 @@ def main(gridname):
 	# False means black player, True means white player
 	game = minimax(new_game, 0, 'defensive', True)
 	print_grid(game.state)
+	if goal_check(game.state):
+		print "game's over"
+	else:
+		print "game's not over"
+	while
+
 
 if __name__ == '__main__':
 	main("new_game.txt")
