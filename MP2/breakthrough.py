@@ -1,6 +1,8 @@
 
 from node import Node 
 import random
+import sys
+import copy
 
 #global definitions:
 black_list = []
@@ -31,10 +33,12 @@ def make_grid():
 
 # This function adds the (x,y) positions of the white and black pieces to their respective
 # lists. 
-def populate_lists():
-	grid = make_grid()
+def populate_lists(gridname):
+	grid = gridname
 	global black_list
 	global white_list
+	black_list = []
+	white_list = []
 
 	for ypos in range(10):
 		for xpos in range(10):
@@ -47,6 +51,9 @@ def populate_lists():
 def goal_check(gridname):
 	if gridname == None: 
 		return False
+	
+	if len(black_list) == 0 or len(white_list) == 0: 
+		return True
 
 	for xpos in range(10):
 		if gridname[1][xpos] == 'W' or gridname[8][xpos] == 'B':
@@ -61,22 +68,24 @@ def goal_check(gridname):
 # evaluates each game state which follows a valid move
 # returns the best move
 def minimax(node, depth, heuristic_type, player_color):
+	global white_list 
+	global black_list
 	score = 0 
 	# if depth = 3 or if game over 
-	print "PASS TO NODE"
-	print_grid(node.state)
 	if player_color:
 		use_list = white_list 
 	else: 
 		use_list = black_list
 
-	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
+	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0) or goal_check(node.state): 
 		#print "REACHED DEPTH"
 		if heuristic_type == 'defensive':
 			return defensive_heuristic(len(use_list))
 		else:
 			return offensive_heuristic(len(use_list))
-	moves = get_possible_moves(node, player_color).possiblemoves	
+	populate_lists(node.state)
+	moves = get_possible_moves(node, player_color).possiblemoves
+	print "moves:" + str(len(moves))
 	best_move = moves[0]
 	best_score = float('-inf')
 	for move in moves:
@@ -90,6 +99,8 @@ def minimax(node, depth, heuristic_type, player_color):
 	return best_move
 
 def min_player(node, depth, heuristic_type, player_color):
+	global white_list 
+	global black_list
 	score = 0 
 
 	if player_color:
@@ -97,7 +108,7 @@ def min_player(node, depth, heuristic_type, player_color):
 	else: 
 		use_list = black_list
 
-	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
+	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0) or goal_check(node.state): 
 		#print "REACHED DEPTH-MIN"
 		if heuristic_type == 'defensive':
 			return defensive_heuristic(len(use_list))
@@ -106,6 +117,7 @@ def min_player(node, depth, heuristic_type, player_color):
 	#print "Node type: MIN" + str(type(node))
 	opposing_player = not player_color
 	#print "opposing player is: " + str(opposing_player)
+	populate_lists(node.state)
 	moves = get_possible_moves(node, opposing_player).possiblemoves
 	best_score = float('inf')
 	for move in moves:
@@ -118,6 +130,8 @@ def min_player(node, depth, heuristic_type, player_color):
 	return best_score
 
 def max_player(node, depth, heuristic_type, player_color):
+	global white_list 
+	global black_list
 	score = 0 
 
 	if player_color:
@@ -125,13 +139,14 @@ def max_player(node, depth, heuristic_type, player_color):
 	else: 
 		use_list = black_list
 
-	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
+	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0) or goal_check(node.state): 
 		#print "REACHED DEPTH- MAX"
 		if heuristic_type == 'defensive':
 			return offensive_heuristic(len(use_list))
 		else:
 			return offensive_heuristic(len(use_list))
 	#print "Node type: MAX" + str(type(node))
+	populate_lists(node.state)
 	moves = get_possible_moves(node, player_color).possiblemoves
 	best_score = float('-inf')
 	for move in moves:
@@ -151,12 +166,21 @@ def offensive_heuristic(num_opposing_remaining):
 	return 2 * (30 - num_opposing_remaining) + random.random()
 
 def get_possible_moves(node, which_list):
+	global white_list
+	global black_list
+	newy = 0 
 	if which_list:
 		use_list = white_list
 	else:
 		use_list = black_list
 
+	#print "currently analyzing: " + str(which_list) + " with length " + str(len(use_list))
+
+	temp_list = []
+	check_grid = copy.deepcopy(node.state)
+	
 	for piece in use_list:
+		updateflag = False
 		x = piece[0]
 		y = piece[1]
 
@@ -167,39 +191,59 @@ def get_possible_moves(node, which_list):
 			newy = y+1
 			newchar = 'B'
 
-	 	if is_valid(x-1, newy, 0, which_list): #left diagonal
-	 		#print "(" + str(x) + ", " + str(y) + ") can move left diagonal."
-	 		temp_grid0= make_grid()
+		#when moving pieces need to update the location in the list
+	 	if is_valid(check_grid, x-1, newy, 0, which_list): #left diagonal
+	 		#print "(" + str(x) + ", " + str(y) + ") can move left diagonal." 
+	 		temp_grid0 = copy.deepcopy(check_grid)
 	 		temp_grid0[y][x] = ' ' #vacate old spot
 	 		temp_grid0[newy][x-1] = newchar #move to new spot
+	 		updateflag = True
+	 		#temp_list.append((x-1, y))
+	 		#print_grid(temp_grid0)
 	 		leftnode = Node(temp_grid0)
 			node.possiblemoves.append(leftnode)
-	 	if is_valid(x, newy, 1, which_list): #straight
+
+	 	if is_valid(check_grid, x, newy, 1, which_list): #straight
 	 		#print "(" + str(x) + ", " + str(y) + ") can move straight."
-	 		temp_grid1 = make_grid()
+	 		temp_grid1= copy.deepcopy(check_grid)
 	 		temp_grid1[y][x] = ' '
 	 		temp_grid1[newy][x] = newchar
+	 		updateflag = True
+	 		#temp_list.append((x, newy))
 	 		#print_grid(temp_grid1)
 	 		straightnode = Node(temp_grid1)
 	 		node.possiblemoves.append(straightnode)
-	 	if is_valid(x+1, newy, 2, which_list): #right diagonal
+	 		
+	 	if is_valid(check_grid, x+1, newy, 2, which_list): #right diagonal
 	 		#print "(" + str(x) + ", " + str(y) + ") can move right diagonal."
-	 		temp_grid2 = make_grid()
+	 		temp_grid2= copy.deepcopy(check_grid)
 			temp_grid2[y][x] = ' '
 			temp_grid2[newy][x+1] = newchar
+			updateflag = True
+	 		#temp_list.append((x+1, newy))
 			#print_grid(temp_grid2)
 			rightnode = Node(temp_grid2)
 	 		node.possiblemoves.append(rightnode)
+	updateflag = False
+
+	# if updateflag:
+	#  	use_list.remove(piece)
+	#  	use_list = use_list + temp_list
+
+	updateflag = False
+
 	return node
 
 def print_grid(gridname):
 	print('\n'.join([''.join(['{:1}'.format(item) for item in row]) for row in gridname]))
 
 # 0 = left diagonal, 1 = straight, 2 = right diagonal
-def is_valid(x, y, action, which_list):
-	grid = make_grid()
-
+def is_valid(grid, x, y, action, which_list):
 	#make sure its a valid point within (0, 0) to (9, 9)
+	global black_list
+	global white_list
+	#print "black: " + str(len(black_list)) + " white: " + str(len(white_list))
+
 	if which_list:
 		if (x >= 0 and x <= 9 and y >= 0 and y <= 9):
 			if (grid[y][x]== '%' or grid[y][x] == 'W'): #if it's a border or occupied, return false right away
@@ -207,12 +251,14 @@ def is_valid(x, y, action, which_list):
 			else:
 				if (grid[y][x] == ' '):
 					return True
-				else:
-					if (grid[y][x] == 'B' and (action == 0 or action ==2)): #if it's occupied by black and you moved straight
-						black_list.remove((x, y))
-						return True
-					else:
-						return False
+				#else:
+				if (grid[y][x] == 'B' and (action == 0 or action ==2)): #if it's occupied by black and you moved straight
+					#print "trying to remove ( " + str(x) + ", " + str(y) + ") "
+					#black_list.remove((x, y)) 
+					#print "shortening black"
+					return True
+				#else:
+					#return False
 				
 		else:
 			return False
@@ -223,12 +269,12 @@ def is_valid(x, y, action, which_list):
 			else:
 				if(grid[y][x] == ' '):
 					return True
-				else:
-					if (grid[y][x] == 'W' and (action == 0 or action == 2)): #if it's occupied by white and you moved straight
-						white_list.remove((x,y))
-						return True
-					else:
-						return False
+				#else:
+				if (grid[y][x] == 'W' and (action == 0 or action == 2)): #if it's occupied by white and you moved straight
+					#white_list.remove((x,y))
+					return True
+					# else:
+					# 	return False
 		else:
 			return False
 
@@ -239,6 +285,8 @@ def is_valid(x, y, action, which_list):
 # a/b search updates the values of a/b as it goes along and prunes the remaining branches at a node 
 # AS SOON AS THE VALUE OF THE CURRENT NODE IS KNWON TO BEWORSE THAN THE CURRENT A/B 
 def alphabeta_search(node, depth, heuristic_type, player_color, alpha, beta):
+	global white_list 
+	global black_list
 	score = 0 
 	# if depth = 3 or if game over 
 	if player_color:
@@ -246,13 +294,14 @@ def alphabeta_search(node, depth, heuristic_type, player_color, alpha, beta):
 	else: 
 		use_list = black_list
 
-	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
+	if depth == 3 or (len(black_list) == 0 or len(white_list) == 0) or goal_check(node.state): 
 		#print "REACHED DEPTH"
 		if heuristic_type == 'defensive':
 			return defensive_heuristic(len(use_list))
 		else:
 			return offensive_heuristic(len(use_list))
 	#print "Node type: MINIMAX" + str(type(node))
+	populate_lists(node.state)
 	moves = get_possible_moves(node, player_color).possiblemoves	
 	best_move = moves[0]
 	best_score = float('-inf')
@@ -263,10 +312,12 @@ def alphabeta_search(node, depth, heuristic_type, player_color, alpha, beta):
 		if score > best_score: 
 			best_move = move
 			best_score = score
-		
+
 	return best_move
 
 def min_player_alpha(node, depth, heuristic_type, player_color, alpha, beta):
+	global white_list 
+	global black_list
 	score = 0 
 
 	if player_color:
@@ -274,7 +325,7 @@ def min_player_alpha(node, depth, heuristic_type, player_color, alpha, beta):
 	else: 
 		use_list = black_list
 
-	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
+	if depth == 3 or (len(black_list) == 0 or len(white_list) == 0) or goal_check(node.state): 
 		#print "REACHED DEPTH-MIN"
 		if heuristic_type == 'defensive':
 			return defensive_heuristic(len(use_list))
@@ -283,6 +334,7 @@ def min_player_alpha(node, depth, heuristic_type, player_color, alpha, beta):
 	#print "Node type: MIN" + str(type(node))
 	opposing_player = not player_color
 	#print "opposing player is: " + str(opposing_player)
+	populate_lists(node.state)
 	moves = get_possible_moves(node, opposing_player).possiblemoves
 	best_score = float('inf')
 	for move in moves:
@@ -298,6 +350,8 @@ def min_player_alpha(node, depth, heuristic_type, player_color, alpha, beta):
 	return best_score
 
 def max_player_alpha(node, depth, heuristic_type, player_color, alpha, beta):
+	global white_list 
+	global black_list
 	score = 0 
 
 	if player_color:
@@ -305,13 +359,14 @@ def max_player_alpha(node, depth, heuristic_type, player_color, alpha, beta):
 	else: 
 		use_list = black_list
 
-	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
+	if depth == 3 or (len(black_list) == 0 or len(white_list) == 0) or goal_check(node.state): 
 		#print "REACHED DEPTH- MAX"
 		if heuristic_type == 'defensive':
 			return offensive_heuristic(len(use_list))
 		else:
 			return offensive_heuristic(len(use_list))
 	#print "Node type: MAX" + str(type(node))
+	populate_lists(node.state)
 	moves = get_possible_moves(node, player_color).possiblemoves
 	best_score = float('-inf')
 	for move in moves:
@@ -326,9 +381,12 @@ def max_player_alpha(node, depth, heuristic_type, player_color, alpha, beta):
 	return best_score
 
 def main(gridname):
+	global white_list 
+	global black_list
+	sys.stdout = open ("results.txt", "w")
 	grid = make_grid()
 
-	populate_lists()
+	populate_lists(grid)
 	# print "Black list:" + str(black_list)
 	# print "Num black pieces: " + str(len(black_list))
 	# print "White list:" + str(white_list)
@@ -352,15 +410,23 @@ def main(gridname):
 
 	player = True
 	new_game = Node(grid)
-	game = minimax(new_game, 0, 'defensive', player)
+	game = minimax(new_game, 0, 'offensive', player)
 	print_grid(game.state)
 	player = False
 	count = 0 
-
-	while (count < 3):
-		print str(player)
-		game2 = minimax(game, 0, 'defensive', player) #white goes first
+	game2 = Node(game.state)
+	while (goal_check(game.state)!= True):
+		if count %2 == 0: #even so its white so do minimax
+			game2 = minimax(game, 0, 'offensive', player) #white goes first
+		else:
+			game2 = alphabeta_search(game, 0, 'offensive', player, float('-inf'), float('inf'))
+		print "update:"
 		print_grid(game2.state)
+		populate_lists(game2.state)
+		print "Black list:" + str(black_list)
+		print "Num black pieces: " + str(len(black_list))
+		print "White list:" + str(white_list)
+		print "Num white pieces: " + str(len(white_list))
 		game = Node(game2.state)
 		player = not player
 		count += 1
