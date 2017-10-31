@@ -29,11 +29,13 @@ def copy_grid(grid, colorList):
 		for c in range(0, len(grid[y])):
 			if grid[y][c].assignment == '_':
 				var = Variable(c, y, '_', None, None)
+				var.domain = []
 				var.domain = copy_colorList(colorList)
 				var.state = 0
 			else:
 				var = Variable(c, y, grid[y][c].assignment, None, None)
-				var.domain = grid[y][c].assignment
+				var.domain = []
+				var.domain.append(grid[y][c].assignment)
 				var.state = 1
 
 			grid3.append(var)
@@ -42,16 +44,15 @@ def copy_grid(grid, colorList):
 
 	return grid2
 
-
-			
-
+# This function implements the smart CSP by selecting most constrained variables with a priority queue
+# and implementing forward checking
 def smart_csp_search(grid, colorList, colorLoc, colorPaths, domainList):
-	# raw_input("Enter")
 	# print out the current maze	
 	for z in range(0, len(grid)):
 		print ' '.join(grid[z][y].assignment for y in range(0, len(grid[z]))) 
 	print " "
 	print colorPaths
+	# Save instance of grid in this stack frame
 	new_grid = []
 	new_grid = copy_grid(grid, colorList)
 	# check whether a valid solution is found that satisfy...
@@ -83,8 +84,9 @@ def smart_csp_search(grid, colorList, colorLoc, colorPaths, domainList):
 		if successorList[i]:
 			for j in range(0, len(successorList[i])):
 				nextStates.put((len(successorList[i]), successorList[i][j]))
-		# print "Queue", (nextStates.queue)
 
+
+	# Base case for when priority queue is empty
 	if nextStates.empty():
 		return None	
 	print "SUCCESSORS", successorList 
@@ -92,8 +94,9 @@ def smart_csp_search(grid, colorList, colorLoc, colorPaths, domainList):
 
 
 	# Pick the next cell to expand from the priority queue according to whichever cell variable is most constrained in priority queue 
-	# and has best value according to manhattan distance from goal heuristic
+	# and has best value according to manhattan distance from goal heuristic. Recurse until all values traversed or constraints satisfied
 	while not nextStates.empty():
+		# Get the next state
 		curAssign = nextStates.get()
 		curDir = curAssign[1][0]
 		curDist = curAssign[1][1]
@@ -101,6 +104,7 @@ def smart_csp_search(grid, colorList, colorLoc, colorPaths, domainList):
 		assignX = colorPaths[curVal+'x'][-1]
 		assignY = colorPaths[curVal+'y'][-1]
 
+		# Learn its direction
 		if curDir == 'L':
 			nextX = assignX-1
 			nextY = assignY
@@ -115,49 +119,57 @@ def smart_csp_search(grid, colorList, colorLoc, colorPaths, domainList):
 			nextY = assignY+1
 		assignedCell = grid[nextY][nextX]
 		if curVal not in new_grid[nextY][nextX].domain:
+			print "hi"
 			raw_input("enter")
 			continue
+		# Assign value
 		assignedCell.assignment = curVal
 		assignedCell.state = 2
 		pathCheck = True
 		for a in range(0, len(colorPaths[curVal+'x'])):
 			if neighbors(grid, assignedCell, curVal, colorLoc) == False or squareCheck(grid, assignedCell) == False:
 				pathCheck = False
-		
+		# Assign the cell
 		assignedCell.assignment = '_'
 		assignedCell.state = 0
+		# Do recursion after doing forward checking
 		if pathCheck and forward_checking(grid, colorList, colorLoc, colorPaths, new_grid):
 			assignedCell.assignment = curVal
 			assignedCell.state = 2	
 			colorPaths[curVal+'x'].append(nextX)
 			colorPaths[curVal+'y'].append(nextY)
 			domainList.append(new_grid)
+			# Recurse through and select a new cell
 			returnVal = smart_csp_search(grid, colorList, colorLoc, colorPaths, domainList)
 			new_grid = domainList.pop()
 			if(returnVal != None):
 				return grid
 
 
-			# print new_grid[colorPaths[curVal+'y'][-1]][colorPaths[curVal+'x'][-1]].domain
-			# raw_input("enter")
-			# colorPaths[colorPaths[curVal+'y'][-1]][colorPaths[curVal+'x'][-1]].domain.remove(colorVal)
+			# remove assignment
 			colorPaths[curVal+'x'] = colorPaths[curVal+'x'][:-1]
 			colorPaths[curVal+'y'] = colorPaths[curVal+'y'][:-1]
-		
+
+		# If there is a failure
+		print new_grid[colorPaths[curVal+'y'][-1]][colorPaths[curVal+'x'][-1]].domain
+		if curVal in new_grid[colorPaths[curVal+'y'][-1]][colorPaths[curVal+'x'][-1]].domain:
+			new_grid[colorPaths[curVal+'y'][-1]][colorPaths[curVal+'x'][-1]].domain.remove(curVal)
 		assignedCell.assignment = '_'
 		assignedCell.state = 0
 
+		# Print final grid in this instance
 		for z in range(0, len(grid)):
 			print ' '.join(grid[z][y].assignment for y in range(0, len(grid[z])))
 		print " "
 
 
-# # This function finds the availability of different paths through neighboring cells
+# This function finds the availability of different paths through neighboring cells
 def most_constrained_var(grid, x, y, colorVal, colorLoc, nextStates):
 	successorList = []
 	numOpen = 0
 	mdL = mdR = mdU = mdD = -1
 	up = down = left = right = False
+	# Find which neighboring cells are open and place in a tuple to organize data and determine most constrained one
 	if x > 0:
 		if grid[y][x-1].assignment == '_':
 			numOpen += 1
@@ -191,6 +203,7 @@ def most_constrained_var(grid, x, y, colorVal, colorLoc, nextStates):
 			if colorLoc[grid[y][x].assignment+'End'] == (x, y+1):
 				return
 
+	# organize the list of neighboring cells with same parent cell based on manhatten distance heuristic
 	successors = []
 	if mdL >= 0:
 		successors.append(('L', mdL, colorVal))
@@ -201,6 +214,7 @@ def most_constrained_var(grid, x, y, colorVal, colorLoc, nextStates):
 	if mdD >= 0:
 		successors.append(('D', mdD, colorVal))
 
+		# return successor list for all current path variables
 	while successors:
 		minDist = 1000
 		minDir =  successors[0][0]
@@ -213,6 +227,7 @@ def most_constrained_var(grid, x, y, colorVal, colorLoc, nextStates):
 
 	return successorList
 
+# checks additional constraint to make sure cells are not all same color in a 2x2 square for a given cell
 def squareCheck(grid, assignedCell):
 	curX = assignedCell.x
 	curY = assignedCell.y
@@ -230,10 +245,12 @@ def squareCheck(grid, assignedCell):
 			return False
 	return True
 
+# returns the manhattan distance to the goal for current path cell
 def manhattan_distance_ordering(colorVal, colorLoc, x, y):
 	endPath = colorLoc.get(colorVal+'End')
 	return abs(endPath[0]-x) + abs(endPath[1]-y)
 
+# uses a bfs search to determine whether a path exists to the goal for a given color
 def forward_checking(grid, colorList, colorLoc, colorPaths, new_grid):
 	for i in colorList:
 		start = (colorPaths[i+'x'][-1], colorPaths[i+'y'][-1])
@@ -243,6 +260,7 @@ def forward_checking(grid, colorList, colorLoc, colorPaths, new_grid):
 			return False
 	return True
 
+# Implement bfs to find a path from one starting node to another
 def bfs_search(grid, i, colorLoc, start, end):
 	cost = 0 
 	expansion_counter = 0
@@ -319,14 +337,18 @@ def bfs_search(grid, i, colorLoc, start, end):
 
 
 ##################################################################
+# initializes global variable to count number of iterations
 def iterative_count():
 	global iterations
 	iterations = 0
 
+# increments counter for each iteration
 def increment_count():
 	global iterations
 	iterations += 1
 
+# Implements the dumb CSP solver complete with randomized variable and value assignment patterns, recursion, and a depth limit
+# to prevent running on for a LONG time
 def dumb_csp_search(grid, colorList, colorLoc, cellList):
 	increment_count()
 	print "ITERATIONS", iterations
@@ -377,6 +399,7 @@ def dumb_csp_search(grid, colorList, colorLoc, cellList):
 	return None
 	# print space.x, space.y, space.assignment, space.domain, space.state
 
+# finds out if a cell and its neighbors all have right number of neighbors of same color
 def neighbors(grid, space, newAssign, colorLoc):
 	if (numNeighbors(grid, space, newAssign, colorLoc)):
 		if(space.x > 0):
@@ -406,7 +429,8 @@ def neighbors(grid, space, newAssign, colorLoc):
 		return True
 
 	return False
-	
+
+# finds out if a cell has an appropriate number of neighbors	
 def numNeighbors(grid, space, newAssign, colorLoc):
 	numNeighbors = 0
 	if(space.x > 0):
@@ -432,6 +456,7 @@ def numNeighbors(grid, space, newAssign, colorLoc):
 	return (numNeighbors <= 2)
 
 ##################################################################
+# This function traces a solution path to verify that a color has found a solution path
 def findPath(grid, start, goal):
 	path = []
 	visited = []
@@ -480,6 +505,7 @@ def findPath(grid, start, goal):
 
 	return path
 
+# This is the main function which initializes both dumb and smart CSP solvers
 def main(filename):
 	flowFree = readFile(filename)
 	colorList = []
@@ -590,5 +616,6 @@ def main(filename):
 		print "FAILED TO FIND SOLUTION"
 		return None
 
+# Choose the solver
 if __name__ == "__main__" : 
 	main("input77.txt")
