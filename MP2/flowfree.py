@@ -1,4 +1,5 @@
 from variable import Variable
+from collections import deque
 import random
 from Queue import PriorityQueue
 
@@ -13,15 +14,46 @@ def readFile(filename):
 
 	return flowFreeMap
 
-def smart_csp_search(grid, colorList, colorLoc, colorPaths):
+
+def copy_colorList(colorList):
+	colorList2 = []
+	for i in colorList:
+		 colorList2.append(i)
+	return colorList2
+
+def copy_grid(grid, colorList):
+	grid2 = []
+
+	for y in range(0,len(grid)):
+		grid3 = []
+		for c in range(0, len(grid[y])):
+			if grid[y][c].assignment == '_':
+				var = Variable(c, y, '_', None, None)
+				var.domain = copy_colorList(colorList)
+				var.state = 0
+			else:
+				var = Variable(c, y, grid[y][c].assignment, None, None)
+				var.domain = grid[y][c].assignment
+				var.state = 1
+
+			grid3.append(var)
+			
+		grid2.append(grid3)
+
+	return grid2
+
+
+			
+
+def smart_csp_search(grid, colorList, colorLoc, colorPaths, domainList):
 	# raw_input("Enter")
 	# print out the current maze	
 	for z in range(0, len(grid)):
 		print ' '.join(grid[z][y].assignment for y in range(0, len(grid[z]))) 
 	print " "
 	print colorPaths
-	
-	# raw_input("Press enter")
+	new_grid = []
+	new_grid = copy_grid(grid, colorList)
 	# check whether a valid solution is found that satisfy...
 	# 1) All colors from their starting cell have a clear path to the solution with no branching
 	allPathsFound = True
@@ -47,7 +79,7 @@ def smart_csp_search(grid, colorList, colorLoc, colorPaths):
 		currentY = colorPaths[colorList[i]+'y'][-1]
 		successorList.append([])
 		successorList[i] = most_constrained_var(grid, currentX, currentY, colorList[i], colorLoc, nextStates)
-		# print "SUCCESSORS", successorList[i]
+		
 		if successorList[i]:
 			for j in range(0, len(successorList[i])):
 				nextStates.put((len(successorList[i]), successorList[i][j]))
@@ -55,6 +87,9 @@ def smart_csp_search(grid, colorList, colorLoc, colorPaths):
 
 	if nextStates.empty():
 		return None	
+	print "SUCCESSORS", successorList 
+	print "Queue", (nextStates.queue)
+
 
 	# Pick the next cell to expand from the priority queue according to whichever cell variable is most constrained in priority queue 
 	# and has best value according to manhattan distance from goal heuristic
@@ -63,10 +98,8 @@ def smart_csp_search(grid, colorList, colorLoc, colorPaths):
 		curDir = curAssign[1][0]
 		curDist = curAssign[1][1]
 		curVal = curAssign[1][2]
-		print "Queue", (nextStates.queue)
 		assignX = colorPaths[curVal+'x'][-1]
 		assignY = colorPaths[curVal+'y'][-1]
-		appendedColor = False
 
 		if curDir == 'L':
 			nextX = assignX-1
@@ -81,6 +114,9 @@ def smart_csp_search(grid, colorList, colorLoc, colorPaths):
 			nextX = assignX
 			nextY = assignY+1
 		assignedCell = grid[nextY][nextX]
+		if curVal not in new_grid[nextY][nextX].domain:
+			raw_input("enter")
+			continue
 		assignedCell.assignment = curVal
 		assignedCell.state = 2
 		pathCheck = True
@@ -88,15 +124,23 @@ def smart_csp_search(grid, colorList, colorLoc, colorPaths):
 			if neighbors(grid, assignedCell, curVal, colorLoc) == False or squareCheck(grid, assignedCell) == False:
 				pathCheck = False
 		
-		if pathCheck and forward_checking(grid, colorList):	
+		assignedCell.assignment = '_'
+		assignedCell.state = 0
+		if pathCheck and forward_checking(grid, colorList, colorLoc, colorPaths, new_grid):
+			assignedCell.assignment = curVal
+			assignedCell.state = 2	
 			colorPaths[curVal+'x'].append(nextX)
 			colorPaths[curVal+'y'].append(nextY)
-
-			returnVal = smart_csp_search(grid, colorList, colorLoc, colorPaths)
-
+			domainList.append(new_grid)
+			returnVal = smart_csp_search(grid, colorList, colorLoc, colorPaths, domainList)
+			new_grid = domainList.pop()
 			if(returnVal != None):
 				return grid
 
+
+			# print new_grid[colorPaths[curVal+'y'][-1]][colorPaths[curVal+'x'][-1]].domain
+			# raw_input("enter")
+			# colorPaths[colorPaths[curVal+'y'][-1]][colorPaths[curVal+'x'][-1]].domain.remove(colorVal)
 			colorPaths[curVal+'x'] = colorPaths[curVal+'x'][:-1]
 			colorPaths[curVal+'y'] = colorPaths[curVal+'y'][:-1]
 		
@@ -106,13 +150,6 @@ def smart_csp_search(grid, colorList, colorLoc, colorPaths):
 		for z in range(0, len(grid)):
 			print ' '.join(grid[z][y].assignment for y in range(0, len(grid[z])))
 		print " "
-
-# 	# del successorList[:]
-# 	# print successorList
-# 	# for z in range(0, len(grid)):
-# 	# 	print ' '.join(grid[z][y].assignment for y in range(0, len(grid[z])))
-# 	# print " "
-
 
 
 # # This function finds the availability of different paths through neighboring cells
@@ -165,7 +202,7 @@ def most_constrained_var(grid, x, y, colorVal, colorLoc, nextStates):
 		successors.append(('D', mdD, colorVal))
 
 	while successors:
-		minDist = successors[0][1]
+		minDist = 1000
 		minDir =  successors[0][0]
 		for i in range(0, len(successors)):
 			if successors[i][1] < minDist:
@@ -197,10 +234,89 @@ def manhattan_distance_ordering(colorVal, colorLoc, x, y):
 	endPath = colorLoc.get(colorVal+'End')
 	return abs(endPath[0]-x) + abs(endPath[1]-y)
 
-def forward_checking(grid, colorList):
-	# for row in grid:
-	# 	for col in row:
+def forward_checking(grid, colorList, colorLoc, colorPaths, new_grid):
+	for i in colorList:
+		start = (colorPaths[i+'x'][-1], colorPaths[i+'y'][-1])
+		end = colorLoc[i+'End']
+		if(bfs_search(grid, i, colorLoc, start, end) == False):
+			print "failed bfs", i
+			return False
 	return True
+
+def bfs_search(grid, i, colorLoc, start, end):
+	cost = 0 
+	expansion_counter = 0
+
+	node = grid[start[1]][start[0]]
+
+	if(node.x == end[0] and node.y == end[1]):
+		return True
+	
+	frontier = deque([])
+
+	frontier.append(start)
+	
+	explored = {}
+	while 1:
+		if len(frontier) == 0:
+			return False
+
+		node = frontier.popleft()
+
+		cur_x = node[0]
+		cur_y = node[1]
+
+		explored[(cur_x, cur_y)]= cur_x + cur_y
+
+		#if can move right, move right
+		if cur_x < len(grid[cur_y])-1 and (grid[cur_y][cur_x+1].assignment == '_'): 
+			child = grid[cur_y][cur_x+1]
+			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
+				if (child.x == end[0] and child.y == end[1]):
+					return True	
+				frontier.append((child.x, child.y))
+				# print "Adding: " + str(child.x) + ", " + str(child.y)
+		elif cur_x < len(grid[cur_y])-1 and manhattan_distance_ordering(i, colorLoc, cur_x, cur_y) == 1:
+					return True
+
+		# if i == 'O':
+		# 	for z in range(0, len(grid)):
+		# 		print ' '.join(grid[z][y].assignment for y in range(0, len(grid[z]))) 
+		# 	print " "
+		#if can move down, move down
+		if cur_y < len(grid)-1 and (grid[cur_y+1][cur_x].assignment == '_'): 
+			child = grid[cur_y+1][cur_x] #initialize child node
+			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
+				if (child.x == end[0] and child.y == end[1]):
+					return True
+				frontier.append((child.x, child.y))
+				# print "Adding: " + str(child.x) + ", " + str(child.y)
+		elif cur_y < len(grid)-1 and manhattan_distance_ordering(i, colorLoc, cur_x, cur_y) == 1:
+					return True
+
+		#if can move up, move up
+		if cur_y > 0 and grid[cur_y-1][cur_x].assignment == '_':
+			child = grid[cur_y-1][cur_x] #initialize child node
+			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
+				if (child.x == end[0] and child.y == end[1]):
+					return True
+				frontier.append((child.x, child.y))
+				# print "Adding: " + str(child.x) + ", " + str(child.y)
+		elif cur_y > 0 and manhattan_distance_ordering(i, colorLoc, cur_x, cur_y) == 1:
+					return True
+
+		#if can move left, move left
+		if cur_x > 0 and grid[cur_y][cur_x-1].assignment == '_': 
+			child = grid[cur_y][cur_x-1] #initialize child node
+			if (child.x, child.y) not in explored and (child.x, child.y) not in frontier:
+				if (child.x == end[0] and child.y == end[1]):
+					return True
+				frontier.append((child.x, child.y))
+				# print "Adding: " + str(child.x) + ", " + str(child.y)
+		elif cur_x > 0 and manhattan_distance_ordering(i, colorLoc, cur_x, cur_y) == 1:
+					return True
+	return False
+
 
 ##################################################################
 def iterative_count():
@@ -219,7 +335,7 @@ def dumb_csp_search(grid, colorList, colorLoc, cellList):
 		return -1
 	for z in range(0, len(grid)):
 		print ' '.join(grid[z][y].assignment for y in range(0, len(grid[z])))
-	raw_input("Press Enter")
+
 	allPathsFound = True
 	for i in colorList:
 		startPath = colorLoc.get(i+'Start')
@@ -449,13 +565,14 @@ def main(filename):
 #---------------------------------------------------------------------------
 # UNCOMMENT THESE LINES TO RUN SMART CSP SOLVER 
 	colorPaths = {}
+	domainList = []
 	for i in colorList:
 		colorStart = colorLoc.get(i+'Start')
 		colorPaths[i+'x'] = []
 		colorPaths[i+'y'] = []
 		colorPaths[i+'x'].append(colorStart[0])
 		colorPaths[i+'y'].append(colorStart[1])
-	smart_csp_search(grid, colorList, colorLoc, colorPaths)
+	smart_csp_search(grid, colorList, colorLoc, colorPaths, domainList)
 
 #----------------------------------------------------------------------------	
 	foundPath = True
@@ -474,4 +591,4 @@ def main(filename):
 		return None
 
 if __name__ == "__main__" : 
-	main("input55.txt")
+	main("input77.txt")
