@@ -90,12 +90,12 @@ def minimax(node, depth, heuristic_type, player_color):
 			return offensive_heuristic2(use_list, player_color, len(opposing_list))
 		if heuristic_type == 3:
 			return defensive_heuristic2(len(use_list), use_list)
-	populate_lists(node.state)
-	moves = get_possible_moves(node, player_color).possiblemoves
+	populate_lists(node.state)#update the lists
+	moves = get_possible_moves(node, player_color).possiblemoves #get all possible moves
 	print "moves:" + str(len(moves))
-	best_move = moves[0]
+	best_move = moves[0] #set temporary "best move" to return
 	best_score = float('-inf')
-	for move in moves:
+	for move in moves: # for each board layout, see what min's response is
 		clone = move
 		score = min_player(clone, depth + 1, heuristic_type, player_color)
 		# #print "The score is: " + str(score) 
@@ -190,22 +190,33 @@ def offensive_heuristic2(own_list, player_color, num_opposing_remaining):
 	else:
 		farthest = max(own_list, key = itemgetter(1))[1]
 
-	return farthest * (40 - num_opposing_remaining) + random.random()
+
+	return 5 * farthest * (30 - num_opposing_remaining) + random.random()
 
 def defensive_heuristic2(num_pieces_remaining, own_list):
-	average = 0
-	for i in own_list:
-		average += i[1]
-	average /= num_pieces_remaining
-	average = int(round(average))
-	total = 0
-	for i in own_list:
-		diff = abs(average-i[1])
-		total += 3-diff
+	numChain = 0
+	prevRow = []
+	curRow = []
+	step = 8
+	for x in range(0, len(own_list)):
+		for z in range(0, len(curRow)):
+			if x > 0:
+				prevRow.append(curRow[z])
+		del curRow[:]
+		for i in own_list:
+			if i[0] == x:
+				curRow.append(i)
 
-	return total
+		for a in prevRow:
+			for b in curRow:
+				if abs(a[1]-b[1]) <= 2:
+					numChain += 1
 
+	return numChain
 
+# This function calculates all the possible resutling board layouts given an initial board layout
+# and a player to move. The board layouts are appended to the node.possiblemoves field for the node
+# that is passed in to the function. 
 def get_possible_moves(node, which_list):
 	global white_list
 	global black_list
@@ -469,14 +480,14 @@ def main(gridname):
 	# 3 = defensive
 	new_game = Node(grid)
 	#game = minimax(new_game, 0, 1, True) #white always goes first
-	game = alphabeta_search(new_game, 0, 2, True, float('-inf'), float('inf'))
+	game = alphabeta_search(new_game, 0, 3, True, float('-inf'), float('inf'))
 	print_grid(game.state)
 	count = 1
 	game2 = Node(game.state)
 	while (goal_check(game.state)!= True):
 		if count %2 == 0: #even so its white so do minimax
 			#game2 = minimax(game, 0, 1, True) #white goes first
-			game2= alphabeta_search(game, 0, 2, True, float('-inf'), float('inf'))
+			game2= alphabeta_search(game, 0, 3, True, float('-inf'), float('inf'))
 		else:
 			game2 = alphabeta_search(game, 0, 1, False, float('-inf'), float('inf'))
 		print "update:"
