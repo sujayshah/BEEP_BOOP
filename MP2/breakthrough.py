@@ -3,6 +3,7 @@ from node import Node
 import random
 import sys
 import copy
+from operator import itemgetter
 
 #global definitions:
 black_list = []
@@ -74,15 +75,21 @@ def minimax(node, depth, heuristic_type, player_color):
 	# if depth = 3 or if game over 
 	if player_color:
 		use_list = white_list 
+		opposing_list = black_list
 	else: 
 		use_list = black_list
+		opposing_list = white_list
 
 	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0) or goal_check(node.state): 
 		#print "REACHED DEPTH"
-		if heuristic_type == 'defensive':
+		if heuristic_type == 0:
 			return defensive_heuristic(len(use_list))
-		else:
-			return offensive_heuristic(len(use_list))
+		if heuristic_type == 1:
+			return offensive_heuristic(len(opposing_list))
+		if heuristic_type == 2:
+			return offensive_heuristic2(use_list, player_color, len(opposing_list))
+		if heuristic_type == 3:
+			return defensive_heuristic2(len(use_list), use_list)
 	populate_lists(node.state)
 	moves = get_possible_moves(node, player_color).possiblemoves
 	print "moves:" + str(len(moves))
@@ -105,15 +112,21 @@ def min_player(node, depth, heuristic_type, player_color):
 
 	if player_color:
 		use_list = white_list 
+		opposing_list = black_list
 	else: 
 		use_list = black_list
+		opposing_list = white_list
 
 	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0) or goal_check(node.state): 
 		#print "REACHED DEPTH-MIN"
-		if heuristic_type == 'defensive':
+		if heuristic_type == 0:
 			return defensive_heuristic(len(use_list))
-		else:
-			return offensive_heuristic(len(use_list))
+		if heuristic_type == 1:
+			return offensive_heuristic(len(opposing_list))
+		if heuristic_type == 2:
+			return offensive_heuristic2(use_list, player_color, len(opposing_list))
+		if heuristic_type == 3:
+			return defensive_heuristic2(len(use_list), use_list)
 	#print "Node type: MIN" + str(type(node))
 	opposing_player = not player_color
 	#print "opposing player is: " + str(opposing_player)
@@ -135,16 +148,22 @@ def max_player(node, depth, heuristic_type, player_color):
 	score = 0 
 
 	if player_color:
-		use_list = white_list 
+		use_list = white_list
+		opposing_list = black_list 
 	else: 
 		use_list = black_list
+		opposing_list = white_list
 
 	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0) or goal_check(node.state): 
 		#print "REACHED DEPTH- MAX"
-		if heuristic_type == 'defensive':
-			return offensive_heuristic(len(use_list))
-		else:
-			return offensive_heuristic(len(use_list))
+		if heuristic_type == 0:
+			return defensive_heuristic(len(use_list))
+		if heuristic_type == 1:
+			return offensive_heuristic(len(opposing_list))
+		if heuristic_type == 2:
+			return offensive_heuristic2(use_list, player_color, len(opposing_list))
+		if heuristic_type == 3:
+			return defensive_heuristic2(len(use_list), use_list)
 	#print "Node type: MAX" + str(type(node))
 	populate_lists(node.state)
 	moves = get_possible_moves(node, player_color).possiblemoves
@@ -159,11 +178,33 @@ def max_player(node, depth, heuristic_type, player_color):
 
 def defensive_heuristic(num_pieces_remaining):
 	return 2 * num_pieces_remaining + random.random()
-	#offensive heuristic 2 should just focus on getting to the other side
-	#pass in (x,y) values of black or white values 
 
 def offensive_heuristic(num_opposing_remaining):
 	return 2 * (30 - num_opposing_remaining) + random.random()
+
+def offensive_heuristic2(own_list, player_color, num_opposing_remaining):
+	#offensive heuristic 2 should just focus on getting to the other side
+	#pass in (x,y) values of black or white values 
+	if player_color: #if white
+		farthest = min(own_list, key = itemgetter(1))[1]
+	else:
+		farthest = max(own_list, key = itemgetter(1))[1]
+
+	return farthest * (40 - num_opposing_remaining) + random.random()
+
+def defensive_heuristic2(num_pieces_remaining, own_list):
+	average = 0
+	for i in own_list:
+		average += i[1]
+	average /= num_pieces_remaining
+	average = int(round(average))
+	total = 0
+	for i in own_list:
+		diff = abs(average-i[1])
+		total += 3-diff
+
+	return total
+
 
 def get_possible_moves(node, which_list):
 	global white_list
@@ -253,9 +294,6 @@ def is_valid(grid, x, y, action, which_list):
 					return True
 				#else:
 				if (grid[y][x] == 'B' and (action == 0 or action ==2)): #if it's occupied by black and you moved straight
-					#print "trying to remove ( " + str(x) + ", " + str(y) + ") "
-					#black_list.remove((x, y)) 
-					#print "shortening black"
 					return True
 				#else:
 					#return False
@@ -271,10 +309,7 @@ def is_valid(grid, x, y, action, which_list):
 					return True
 				#else:
 				if (grid[y][x] == 'W' and (action == 0 or action == 2)): #if it's occupied by white and you moved straight
-					#white_list.remove((x,y))
 					return True
-					# else:
-					# 	return False
 		else:
 			return False
 
@@ -290,16 +325,23 @@ def alphabeta_search(node, depth, heuristic_type, player_color, alpha, beta):
 	score = 0 
 	# if depth = 3 or if game over 
 	if player_color:
-		use_list = white_list 
+		use_list = white_list
+		opposing_list = black_list
+
 	else: 
 		use_list = black_list
+		opposing_list = white_list
 
 	if depth == 3 or (len(black_list) == 0 or len(white_list) == 0) or goal_check(node.state): 
 		#print "REACHED DEPTH"
-		if heuristic_type == 'defensive':
+		if heuristic_type == 0:
 			return defensive_heuristic(len(use_list))
-		else:
-			return offensive_heuristic(len(use_list))
+		if heuristic_type == 1:
+			return offensive_heuristic(len(opposing_list))
+		if heuristic_type == 2:
+			return offensive_heuristic2(use_list, player_color, len(opposing_list))
+		if heuristic_type == 3:
+			return defensive_heuristic2(len(use_list), use_list)
 	#print "Node type: MINIMAX" + str(type(node))
 	populate_lists(node.state)
 	moves = get_possible_moves(node, player_color).possiblemoves	
@@ -322,15 +364,22 @@ def min_player_alpha(node, depth, heuristic_type, player_color, alpha, beta):
 
 	if player_color:
 		use_list = white_list 
+		opposing_list = black_list
 	else: 
 		use_list = black_list
+		opposing_list = white_list
 
 	if depth == 3 or (len(black_list) == 0 or len(white_list) == 0) or goal_check(node.state): 
 		#print "REACHED DEPTH-MIN"
-		if heuristic_type == 'defensive':
+		if heuristic_type == 0:
 			return defensive_heuristic(len(use_list))
-		else:
-			return offensive_heuristic(len(use_list))
+		if heuristic_type == 1:
+			return offensive_heuristic(len(opposing_list))
+		if heuristic_type == 2:
+			return offensive_heuristic2(use_list, player_color, len(opposing_list))
+		if heuristic_type == 3:
+			return defensive_heuristic2(len(use_list), use_list)
+
 	#print "Node type: MIN" + str(type(node))
 	opposing_player = not player_color
 	#print "opposing player is: " + str(opposing_player)
@@ -356,15 +405,22 @@ def max_player_alpha(node, depth, heuristic_type, player_color, alpha, beta):
 
 	if player_color:
 		use_list = white_list 
+		opposing_list = black_list
 	else: 
 		use_list = black_list
+		opposing_list = white_list
 
 	if depth == 3 or (len(black_list) == 0 or len(white_list) == 0) or goal_check(node.state): 
 		#print "REACHED DEPTH- MAX"
-		if heuristic_type == 'defensive':
-			return offensive_heuristic(len(use_list))
-		else:
-			return offensive_heuristic(len(use_list))
+		if heuristic_type == 0:
+			return defensive_heuristic(len(use_list))
+		if heuristic_type == 1:
+			return offensive_heuristic(len(opposing_list))
+		if heuristic_type == 2:
+			return offensive_heuristic2(use_list, player_color, len(opposing_list))
+		if heuristic_type == 3:
+			return defensive_heuristic2(len(use_list), use_list)
+
 	#print "Node type: MAX" + str(type(node))
 	populate_lists(node.state)
 	moves = get_possible_moves(node, player_color).possiblemoves
@@ -407,19 +463,22 @@ def main(gridname):
 	# 	print "game's over"
 	# else:
 	# 	print "game's not over"
-
-	player = True
+	# 0 = defensive 
+	# 1 = offensive 
+	# 2 = offensive 
+	# 3 = defensive
 	new_game = Node(grid)
-	game = minimax(new_game, 0, 'offensive', player)
+	#game = minimax(new_game, 0, 1, True) #white always goes first
+	game = alphabeta_search(new_game, 0, 2, True, float('-inf'), float('inf'))
 	print_grid(game.state)
-	player = False
-	count = 0 
+	count = 1
 	game2 = Node(game.state)
 	while (goal_check(game.state)!= True):
 		if count %2 == 0: #even so its white so do minimax
-			game2 = minimax(game, 0, 'offensive', player) #white goes first
+			#game2 = minimax(game, 0, 1, True) #white goes first
+			game2= alphabeta_search(game, 0, 2, True, float('-inf'), float('inf'))
 		else:
-			game2 = alphabeta_search(game, 0, 'offensive', player, float('-inf'), float('inf'))
+			game2 = alphabeta_search(game, 0, 1, False, float('-inf'), float('inf'))
 		print "update:"
 		print_grid(game2.state)
 		populate_lists(game2.state)
@@ -428,8 +487,9 @@ def main(gridname):
 		print "White list:" + str(white_list)
 		print "Num white pieces: " + str(len(white_list))
 		game = Node(game2.state)
-		player = not player
+		#player = not player
 		count += 1
+	print count 
 
 if __name__ == '__main__':
 	main("new_game.txt")
