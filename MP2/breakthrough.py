@@ -70,7 +70,7 @@ def minimax(node, depth, heuristic_type, player_color):
 	else: 
 		use_list = black_list
 
-	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
+	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0) or goal_check(node.state): 
 		#print "REACHED DEPTH"
 		if heuristic_type == 'defensive':
 			return defensive_heuristic(len(use_list))
@@ -98,7 +98,7 @@ def min_player(node, depth, heuristic_type, player_color):
 	else: 
 		use_list = black_list
 
-	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
+	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0) or goal_check(node.state): 
 		#print "REACHED DEPTH-MIN"
 		if heuristic_type == 'defensive':
 			return defensive_heuristic(len(use_list))
@@ -126,7 +126,7 @@ def max_player(node, depth, heuristic_type, player_color):
 	else: 
 		use_list = black_list
 
-	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
+	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0) or goal_check(node.state): 
 		#print "REACHED DEPTH- MAX"
 		if heuristic_type == 'defensive':
 			return offensive_heuristic(len(use_list))
@@ -179,35 +179,35 @@ def get_possible_moves(node, which_list):
 
 		#when moving pieces need to update the location in the list
 	 	if is_valid(check_grid, x-1, newy, 0, which_list): #left diagonal
-	 		#print "(" + str(x) + ", " + str(y) + ") can move left diagonal."
+	 		print "(" + str(x) + ", " + str(y) + ") can move left diagonal."
 	 		temp_grid0 = copy.deepcopy(check_grid)
-	 		#print_grid(temp_grid0)
 	 		temp_grid0[y][x] = ' ' #vacate old spot
 	 		temp_grid0[newy][x-1] = newchar #move to new spot
 	 		updateflag = True
 	 		temp_list.append((x-1, y))
+	 		print_grid(temp_grid0)
 	 		leftnode = Node(temp_grid0)
 			node.possiblemoves.append(leftnode)
 
 	 	if is_valid(check_grid, x, newy, 1, which_list): #straight
-	 		#print "(" + str(x) + ", " + str(y) + ") can move straight."
+	 		print "(" + str(x) + ", " + str(y) + ") can move straight."
 	 		temp_grid1= copy.deepcopy(check_grid)
 	 		temp_grid1[y][x] = ' '
 	 		temp_grid1[newy][x] = newchar
 	 		updateflag = True
 	 		temp_list.append((x, newy))
-	 		#print_grid(temp_grid1)
+	 		print_grid(temp_grid1)
 	 		straightnode = Node(temp_grid1)
 	 		node.possiblemoves.append(straightnode)
 	 		
 	 	if is_valid(check_grid, x+1, newy, 2, which_list): #right diagonal
-	 		#print "(" + str(x) + ", " + str(y) + ") can move right diagonal."
+	 		print "(" + str(x) + ", " + str(y) + ") can move right diagonal."
 	 		temp_grid2= copy.deepcopy(check_grid)
 			temp_grid2[y][x] = ''
 			temp_grid2[newy][x+1] = newchar
 			updateflag = True
 	 		temp_list.append((x+1, newy))
-			#print_grid(temp_grid2)
+			print_grid(temp_grid2)
 			rightnode = Node(temp_grid2)
 	 		node.possiblemoves.append(rightnode)
 	updateflag = False
@@ -228,7 +228,7 @@ def is_valid(grid, x, y, action, which_list):
 	#make sure its a valid point within (0, 0) to (9, 9)
 	global black_list
 	global white_list
-	#print "black: " + str(len(black_list)) + " white: " + str(len(white_list))
+	print "black: " + str(len(black_list)) + " white: " + str(len(white_list))
 
 	if which_list:
 		if (x >= 0 and x <= 9 and y >= 0 and y <= 9):
@@ -277,7 +277,7 @@ def alphabeta_search(node, depth, heuristic_type, player_color, alpha, beta):
 	else: 
 		use_list = black_list
 
-	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
+	if depth == 3 or (len(black_list) == 0 or len(white_list) == 0): 
 		#print "REACHED DEPTH"
 		if heuristic_type == 'defensive':
 			return defensive_heuristic(len(use_list))
@@ -305,7 +305,7 @@ def min_player_alpha(node, depth, heuristic_type, player_color, alpha, beta):
 	else: 
 		use_list = black_list
 
-	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
+	if depth == 3 or (len(black_list) == 0 or len(white_list) == 0): 
 		#print "REACHED DEPTH-MIN"
 		if heuristic_type == 'defensive':
 			return defensive_heuristic(len(use_list))
@@ -336,7 +336,7 @@ def max_player_alpha(node, depth, heuristic_type, player_color, alpha, beta):
 	else: 
 		use_list = black_list
 
-	if depth == 2 or (len(black_list) == 0 or len(white_list) == 0): 
+	if depth == 3 or (len(black_list) == 0 or len(white_list) == 0): 
 		#print "REACHED DEPTH- MAX"
 		if heuristic_type == 'defensive':
 			return offensive_heuristic(len(use_list))
@@ -384,13 +384,16 @@ def main(gridname):
 
 	player = True
 	new_game = Node(grid)
-	game = minimax(new_game, 0, 'defensive', player)
+	game = minimax(new_game, 0, 'offensive', player)
 	print_grid(game.state)
 	player = False
 	count = 0 
-
-	while (count < 2):
-		game2 = minimax(game, 0, 'defensive', player) #white goes first
+	game2 = Node(game.state)
+	while (goal_check(game2.state)!= True):
+		if count %2 == 0: #even so its white so do minimax
+			game2 = minimax(game, 0, 'offensive', player) #white goes first
+		else:
+			game2 = alphabeta_search(game, 0, 'offensive', player, float('-inf'), float('inf'))
 		print "update:"
 		print_grid(game2.state)
 		game = Node(game2.state)
