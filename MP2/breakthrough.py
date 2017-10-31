@@ -88,6 +88,8 @@ def minimax(node, depth, heuristic_type, player_color):
 			return offensive_heuristic(len(opposing_list))
 		if heuristic_type == 2:
 			return offensive_heuristic2(use_list, player_color, len(opposing_list))
+		if heuristic_type == 3:
+			return defensive_heuristic2(len(use_list), use_list)
 	populate_lists(node.state)
 	moves = get_possible_moves(node, player_color).possiblemoves
 	print "moves:" + str(len(moves))
@@ -123,6 +125,8 @@ def min_player(node, depth, heuristic_type, player_color):
 			return offensive_heuristic(len(opposing_list))
 		if heuristic_type == 2:
 			return offensive_heuristic2(use_list, player_color, len(opposing_list))
+		if heuristic_type == 3:
+			return defensive_heuristic2(len(use_list), use_list)
 	#print "Node type: MIN" + str(type(node))
 	opposing_player = not player_color
 	#print "opposing player is: " + str(opposing_player)
@@ -158,6 +162,8 @@ def max_player(node, depth, heuristic_type, player_color):
 			return offensive_heuristic(len(opposing_list))
 		if heuristic_type == 2:
 			return offensive_heuristic2(use_list, player_color, len(opposing_list))
+		if heuristic_type == 3:
+			return defensive_heuristic2(len(use_list), use_list)
 	#print "Node type: MAX" + str(type(node))
 	populate_lists(node.state)
 	moves = get_possible_moves(node, player_color).possiblemoves
@@ -172,7 +178,6 @@ def max_player(node, depth, heuristic_type, player_color):
 
 def defensive_heuristic(num_pieces_remaining):
 	return 2 * num_pieces_remaining + random.random()
-	
 
 def offensive_heuristic(num_opposing_remaining):
 	return 2 * (30 - num_opposing_remaining) + random.random()
@@ -185,7 +190,20 @@ def offensive_heuristic2(own_list, player_color, num_opposing_remaining):
 	else:
 		farthest = max(own_list, key = itemgetter(1))[1]
 
-	return farthest * num_opposing_remaining + random.random()
+	return farthest * (40 - num_opposing_remaining) + random.random()
+
+def defensive_heuristic2(num_pieces_remaining, own_list):
+	average = 0
+	for i in own_list:
+		average += i[1]
+	average /= num_pieces_remaining
+	average = int(round(average))
+	total = 0
+	for i in own_list:
+		diff = abs(average-i[1])
+		total += 3-diff
+
+	return total
 
 
 def get_possible_moves(node, which_list):
@@ -322,6 +340,8 @@ def alphabeta_search(node, depth, heuristic_type, player_color, alpha, beta):
 			return offensive_heuristic(len(opposing_list))
 		if heuristic_type == 2:
 			return offensive_heuristic2(use_list, player_color, len(opposing_list))
+		if heuristic_type == 3:
+			return defensive_heuristic2(len(use_list), use_list)
 	#print "Node type: MINIMAX" + str(type(node))
 	populate_lists(node.state)
 	moves = get_possible_moves(node, player_color).possiblemoves	
@@ -357,6 +377,8 @@ def min_player_alpha(node, depth, heuristic_type, player_color, alpha, beta):
 			return offensive_heuristic(len(opposing_list))
 		if heuristic_type == 2:
 			return offensive_heuristic2(use_list, player_color, len(opposing_list))
+		if heuristic_type == 3:
+			return defensive_heuristic2(len(use_list), use_list)
 
 	#print "Node type: MIN" + str(type(node))
 	opposing_player = not player_color
@@ -396,6 +418,8 @@ def max_player_alpha(node, depth, heuristic_type, player_color, alpha, beta):
 			return offensive_heuristic(len(opposing_list))
 		if heuristic_type == 2:
 			return offensive_heuristic2(use_list, player_color, len(opposing_list))
+		if heuristic_type == 3:
+			return defensive_heuristic2(len(use_list), use_list)
 
 	#print "Node type: MAX" + str(type(node))
 	populate_lists(node.state)
@@ -439,19 +463,22 @@ def main(gridname):
 	# 	print "game's over"
 	# else:
 	# 	print "game's not over"
-
+	# 0 = defensive 
+	# 1 = offensive 
+	# 2 = offensive 
+	# 3 = defensive
 	new_game = Node(grid)
 	#game = minimax(new_game, 0, 1, True) #white always goes first
 	game = alphabeta_search(new_game, 0, 2, True, float('-inf'), float('inf'))
 	print_grid(game.state)
-	count = 0 
+	count = 1
 	game2 = Node(game.state)
 	while (goal_check(game.state)!= True):
 		if count %2 == 0: #even so its white so do minimax
 			#game2 = minimax(game, 0, 1, True) #white goes first
 			game2= alphabeta_search(game, 0, 2, True, float('-inf'), float('inf'))
 		else:
-			game2 = alphabeta_search(game, 0, 0, False, float('-inf'), float('inf'))
+			game2 = alphabeta_search(game, 0, 1, False, float('-inf'), float('inf'))
 		print "update:"
 		print_grid(game2.state)
 		populate_lists(game2.state)
@@ -462,6 +489,7 @@ def main(gridname):
 		game = Node(game2.state)
 		#player = not player
 		count += 1
+	print count 
 
 if __name__ == '__main__':
 	main("new_game.txt")
