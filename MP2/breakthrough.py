@@ -181,9 +181,9 @@ def offensive_heuristic2(own_list, player_color, num_opposing_remaining):
 	#offensive heuristic 2 should just focus on getting to the other side
 	#pass in (x,y) values of black or white values 
 	if player_color: #if white
-		farthest = min(own_list, key = itemgetter(1))
+		farthest = min(own_list, key = itemgetter(1))[1]
 	else:
-		farthest = max(own_list, key = itemgetter(1))
+		farthest = max(own_list, key = itemgetter(1))[1]
 
 	return farthest * num_opposing_remaining + random.random()
 
@@ -440,19 +440,18 @@ def main(gridname):
 	# else:
 	# 	print "game's not over"
 
-	player = True #white starts as alpha beta h2
 	new_game = Node(grid)
-	#game = minimax(new_game, 0, 1, player)
-	game = alphabeta_search(new_game, 0, 2, player)
+	#game = minimax(new_game, 0, 1, True) #white always goes first
+	game = alphabeta_search(new_game, 0, 2, True, float('-inf'), float('inf'))
 	print_grid(game.state)
-	player = False
 	count = 0 
 	game2 = Node(game.state)
 	while (goal_check(game.state)!= True):
 		if count %2 == 0: #even so its white so do minimax
-			game2 = minimax(game, 0, 1, player) #white goes first
+			#game2 = minimax(game, 0, 1, True) #white goes first
+			game2= alphabeta_search(game, 0, 2, True, float('-inf'), float('inf'))
 		else:
-			game2 = alphabeta_search(game, 0, 1, player, float('-inf'), float('inf'))
+			game2 = alphabeta_search(game, 0, 0, False, float('-inf'), float('inf'))
 		print "update:"
 		print_grid(game2.state)
 		populate_lists(game2.state)
@@ -461,7 +460,7 @@ def main(gridname):
 		print "White list:" + str(white_list)
 		print "Num white pieces: " + str(len(white_list))
 		game = Node(game2.state)
-		player = not player
+		#player = not player
 		count += 1
 
 if __name__ == '__main__':
