@@ -5,17 +5,19 @@ from itertools import islice #islice is used to get the next n items of an itera
 # 0 - 24 first spectrogram
 # 28 - 52 second spectrogram
 def read_file(filename):
-	n = 25
-	with open(filename, 'r') as infile: 
-		while True: 
-			next_n_lines = list(islice(infile, n))
-			
-			if not next_n_lines:
-				break
+	f = open(filename)
+	n = 0 
+	lines = f.readlines() 
+	while not f.readlines():
+		for i in range(n, n + 24): #this is the loop that we can do our work in
+			write_file('temp.txt', lines[i])
+		
+		#n = n + 24 + 4
+		write_file('temp.txt', lines[n + 25])
+		write_file('temp.txt', lines[n + 26])
+		write_file('temp.txt', lines[n + 27])
 
-			for idx, line in enumerate(next_n_lines): 
-				write_file('temp.txt', line)
-				print line,
+		n = n + 24 + 4
 
 # This function takes in a file and a line to write and appends the line to the file
 def write_file(filename, line):
