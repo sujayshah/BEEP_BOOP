@@ -6,11 +6,14 @@ from itertools import islice #islice is used to get the next n items of an itera
 # 28 - 52 second spectrogram
 def read_file(filename):
 	f = open(filename)
+	clear_file('temp.txt')
 	n = 0 
 	lines = f.readlines() 
 	while not f.readlines():
 		for i in range(n, n + 24): #this is the loop that we can do our work in
 			write_file('temp.txt', lines[i])
+			for char in lines[i]:
+				print char
 		
 		#n = n + 24 + 4
 		write_file('temp.txt', lines[n + 25])
@@ -24,6 +27,8 @@ def write_file(filename, line):
 	with open(filename, 'a') as outFile:
 			outFile.write("%s" %line)
 	
+def clear_file(filename):
+	open(filename, 'w').close()
 
 # every spectogram is described by 250 binary variables
 # W(i, j) = 1 if spectrogram(i, j) = ' ' (high energy)
