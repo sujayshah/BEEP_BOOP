@@ -1,17 +1,5 @@
 from itertools import islice #islice is used to get the next n items of an iterator
 
-# This function reads in the text file
-def read_file1(filename):
-	textFile = open(filename, "r")
-	text = []
-
-	for line in textFile:
-		text.append(line.strip().split('\r\n '))
-
-	textFile.close()
-
-	return text
-
 def read_file(filename):
 	# 0 - 24 first spectogram
 	# 28 - 52 
@@ -19,16 +7,17 @@ def read_file(filename):
 	with open(filename, 'r') as infile: 
 		while True: 
 			next_n_lines = list(islice(infile, n))
+			
 			if not next_n_lines:
 				break
 
 			for idx, line in enumerate(next_n_lines): 
-				print line
-				write_file('temp.txt', str(line))
+				write_file('temp.txt', line)
+				print line,
 
 def write_file(filename, line):
 	with open(filename, 'a') as outFile:
-			outFile.write("%s\n" %line)
+			outFile.write("%s" %line)
 	
 
 # every spectogram is described by 250 binary variables
