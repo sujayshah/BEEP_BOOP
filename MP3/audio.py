@@ -1,6 +1,10 @@
 from itertools import islice #islice is used to get the next n items of an iterator
 
-# This function reads in a training file and splices it into lists
+indiv_high_list = []
+indiv_low_list = []
+
+
+# This function reads in a yes_train file and splices it into lists
 # Spectrograms are split into lines of 25 x 10 characters, seperated by 3 blank lines
 # 0 - 24 first spectrogram
 # 28 - 52 second spectrogram
@@ -8,12 +12,30 @@ def read_file(filename):
 	f = open(filename)
 	clear_file('temp.txt')
 	n = 0 
+	num_samples = 1 
 	lines = f.readlines() 
-	while not f.readlines():
-		for i in range(n, n + 24): #this is the loop that we can do our work in
+	#while n < 3665:
+	charlist = [0] * 250 ## need to update to global frequency table
+	while n < 25:
+		for idx, i in enumerate(range(n, n + 25)): #this is the loop that we can do our work in
 			write_file('temp.txt', lines[i])
-			for char in lines[i]:
-				print char
+
+			for col, char in enumerate(lines[i]):
+				if col >= 10: #break on col index 10 since this is just the newline character leftover from readlines()
+					break
+
+				print "Looking at : " + str(idx * 10 + col), 
+
+				if char == '%':
+					print char, 
+					charlist[idx * 10 + col] = 0
+					print "Set!"
+				else: 
+					print char
+					charlist[idx * 10 + col] = 1
+					print "Set!"
+				
+			#print i
 		
 		#n = n + 24 + 4
 		write_file('temp.txt', lines[n + 25])
@@ -21,6 +43,11 @@ def read_file(filename):
 		write_file('temp.txt', lines[n + 27])
 
 		n = n + 24 + 4
+		num_samples = num_samples + 1
+		print charlist
+
+	#print num_samples
+
 
 # This function takes in a file and a line to write and appends the line to the file
 def write_file(filename, line):
