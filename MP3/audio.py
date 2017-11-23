@@ -1,8 +1,10 @@
 from itertools import islice #islice is used to get the next n items of an iterator
 
+# This function reads in a training file and splices it into lists
+# Spectrograms are split into lines of 25 x 10 characters, seperated by 3 blank lines
+# 0 - 24 first spectrogram
+# 28 - 52 second spectrogram
 def read_file(filename):
-	# 0 - 24 first spectogram
-	# 28 - 52 
 	n = 25
 	with open(filename, 'r') as infile: 
 		while True: 
@@ -15,6 +17,7 @@ def read_file(filename):
 				write_file('temp.txt', line)
 				print line,
 
+# This function takes in a file and a line to write and appends the line to the file
 def write_file(filename, line):
 	with open(filename, 'a') as outFile:
 			outFile.write("%s" %line)
