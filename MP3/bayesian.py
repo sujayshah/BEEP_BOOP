@@ -99,24 +99,42 @@ def laplacianSmoothing(trainingData, k, V):
 				trainingData[classValue][i][j][0] += k
 				trainingData[classValue][i][j][1] += (k*V)
 
-def testing(testImages, testLabels, trainingData, trainingClassFrequencies):
+def testing(testImages, trainingData, trainingClassFrequencies):
 	
 	classResults = []
 	mapResults = []
+	intVal = []
+	for i in range(0,28):
+		intVal.append([])
+		for j in range(0, 28):
+			intVal[i].append(0)
 
 	for image in range(0, len(testImages)/28):
 		classResults.append([])
+		for i in range(0,28):
+			for j in range(0,28):
+				curVal = testImages[28*image+i][j]
+				if curVal == '+' or curVal == '#':
+					intVal[i][j] = 1
+				else:
+					intVal[i][j] = 0
+
 		for classVal in range(0,10):
 			classResults[image].append(math.log10(trainingClassFrequencies[classVal]))
-			for i in range(0,28):
-				for j in range(0,28):
-					classResults[image][classVal] *= math.log10(float(trainingData[classVal][i][j][0])/float(trainingData[classVal][i][j][1])) 
-		print image, classResults[image]
-	
+			for i in range(0, len(intVal)):
+				for j in range(0, len(intVal[i])):
+					prob = float(trainingData[classVal][i][j][0])/float(trainingData[classVal][i][j][1])
+					if intVal[i][j] == 0:
+						prob = 1.0-prob
+					classResults[image][classVal] += prob
 
-	# print classResults[0]
-	# print classResults[1]
-	# print len(classResults)
+	for imageResults in classResults:
+		max_value = max(imageResults)
+		max_index = imageResults.index(max_value)
+		print max_value, max_index
+		mapResults.append(max_index)
+	
+	return mapResults
 
 # def evaluation():
 
@@ -141,7 +159,7 @@ def main():
 	testLabels = readLabels("testLabels")
 	print "Training Data Reading Complete"
 	print "Evaluating Test Images"
-	testing(testImages, testLabels, trainingData, trainingClassFrequencies)
+	testing(testImages, trainingData, trainingClassFrequencies)
 	print "Test Images Evaluated"
 	print "Evaluating Results"
 	# evaluation()
