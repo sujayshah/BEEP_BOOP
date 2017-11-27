@@ -1,4 +1,5 @@
 from PIL import Image
+import math
 
 def readImages(filename):
 	textFile = open(filename, "r")
@@ -98,7 +99,24 @@ def laplacianSmoothing(trainingData, k, V):
 				trainingData[classValue][i][j][0] += k
 				trainingData[classValue][i][j][1] += (k*V)
 
-	print trainingData[1]
+def testing(testImages, testLabels, trainingData, trainingClassFrequencies):
+	
+	classResults = []
+	mapResults = []
+
+	for image in range(0, len(testImages)/28):
+		classResults.append([])
+		for classVal in range(0,10):
+			classResults[image].append(math.log10(trainingClassFrequencies[classVal]))
+			for i in range(0,28):
+				for j in range(0,28):
+					classResults[image][classVal] *= math.log10(float(trainingData[classVal][i][j][0])/float(trainingData[classVal][i][j][1])) 
+		print image, classResults[image]
+	
+
+	# print classResults[0]
+	# print classResults[1]
+	# print len(classResults)
 
 # def evaluation():
 
@@ -118,13 +136,17 @@ def main():
 	print "Laplacian Smoothing of Training Data Initiated...."
 	laplacianSmoothing(trainingData, 1, 10)
 	print "Laplacian Smoothing Complete"
+	print "Reading Training Data"
+	testImages = readImages("testImages")
+	testLabels = readLabels("testLabels")
+	print "Training Data Reading Complete"
 	print "Evaluating Test Images"
-	# evaluation()
+	testing(testImages, testLabels, trainingData, trainingClassFrequencies)
 	print "Test Images Evaluated"
-
-	# print trainingData
-	# testImages = readImages("testImages")
-	# testLabels = readLabels("testLabels")
+	print "Evaluating Results"
+	# evaluation()
+	print "Results Evaluated"
+	print "The Bayes Classifier has correctly identified ", 10, "% of the correctly"
 	
 if __name__ == '__main__':
 	main()
