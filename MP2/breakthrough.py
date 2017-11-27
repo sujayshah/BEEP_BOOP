@@ -1,4 +1,3 @@
-
 from node import Node 
 import random
 import sys
@@ -178,6 +177,30 @@ def max_player(node, depth, heuristic_type, player_color):
 
 def defensive_heuristic(num_pieces_remaining):
 	return 2 * num_pieces_remaining + random.random()
+
+def defensive_heuristic2(num_pieces_remianing, black_list):
+	numChain = 0
+	prevRow = []
+	curRow = []
+	step = 8
+	for x in range(0, len(black_list)):
+		for z in range(0, len(curRow)):
+			prevRow[z] = curRow[z]
+		del curRow[:]
+		for i in black_list:
+			if i.x == x:
+				curRow.append(i)
+
+		for a in prevRow:
+			for b in curRow:
+				if abs(a.y-b.y) <= 1
+					numChain += 1
+
+	return numChain
+
+
+
+
 
 def offensive_heuristic(num_opposing_remaining):
 	return 2 * (30 - num_opposing_remaining) + random.random()
