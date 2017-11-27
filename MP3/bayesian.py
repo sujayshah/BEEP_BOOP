@@ -88,18 +88,41 @@ def storeTrainingData(trainingImages, trainingLabels, trainingClassFrequencies):
 				if pixelData[imageIndex][i][j] == '+' or pixelData[imageIndex][i][j] == '#':
 					pixelClassLikelihood[curNumber][i][j][0] += 1
 				pixelClassLikelihood[curNumber][i][j][1] += 1
-	print pixelClassLikelihood[9]
+	
+	return pixelClassLikelihood
 
+def laplacianSmoothing(trainingData, k, V):
+	for classValue in range(0,10):
+		for i in range(0,28):
+			for j in range(0,28):
+				trainingData[classValue][i][j][0] += k
+				trainingData[classValue][i][j][1] += (k*V)
+
+	print trainingData[1]
+
+# def evaluation():
 
 def main():
+	print "Reading Training Data"
 	trainingImages = readImages("trainingImages")
 	trainingLabels = readLabels("trainingLabels")
+	print "Training Data Reading Complete"
 	# writeOutput(trainingImages)
 
+	print "Calculating Prior Frequencies in Training Data"
 	trainingClassFrequencies = priorFrequencies(trainingLabels)
-	print trainingClassFrequencies
-	pixelData = storeTrainingData(trainingImages, trainingLabels, trainingClassFrequencies)
+	print "Prior Frequencies Calculated"
+	print "Evaluating Training Data..."
+	trainingData = storeTrainingData(trainingImages, trainingLabels, trainingClassFrequencies)
+	print "Training Data Evaluation Complete"
+	print "Laplacian Smoothing of Training Data Initiated...."
+	laplacianSmoothing(trainingData, 1, 10)
+	print "Laplacian Smoothing Complete"
+	print "Evaluating Test Images"
+	# evaluation()
+	print "Test Images Evaluated"
 
+	# print trainingData
 	# testImages = readImages("testImages")
 	# testLabels = readLabels("testLabels")
 	
