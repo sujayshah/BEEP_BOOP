@@ -58,22 +58,25 @@ def clear_file(filename):
 	open(filename, 'w').close()
 
 def train(k): #k value is the value for Laplacian smoothing. 
-	no_list = read_file('no_train.txt')
-	yes_list = read_file('yes_train.txt')
+	no_train = read_file('no_train.txt')
+	yes_train = read_file('yes_train.txt')
 
 	likelihood_no = [0] * 250 # times location (i, j) has value '' in training examples from class NO / total # of training examples from this class
 	likelihood_yes = [0] * 250  # times location (i, j) has value '' in training examples from class YES/ total # of training examples from this class
 
-	for idx, sample in enumerate(no_list): 
-		likelihood_no[idx] = no_list[idx][1]/131.0
+	for idx, sample in enumerate(no_train): 
+		likelihood_no[idx] = (no_list[idx][1] + k) / (131.0 + (2 * k))
 
-	for idx, sample in enumerate(yes_list): 
-	 	likelihood_yes[idx] = yes_list[idx][1]/131.0
+	for idx, sample in enumerate(yes_train): 
+	 	likelihood_yes[idx] = (yes_list[idx][1] + k) / (131.0 + (2 * k))
 
-	print no_list 
-	print likelihood_no
-	#print yes_list
 
+# This function performs a MAP classification of "yes" or "no" according to the learned model
+def test():
+	no_test = read_file('no_test.txt')
+	yes_test = read_file('yes_test.txt')
+
+	for idx, sample in enumerate
 
 # every spectogram is described by 250 binary variables
 # W(i, j) = 1 if spectrogram(i, j) = ' ' (high energy)
