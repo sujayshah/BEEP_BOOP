@@ -126,17 +126,24 @@ def testing(testImages, trainingData, trainingClassFrequencies):
 					prob = float(trainingData[classVal][i][j][0])/float(trainingData[classVal][i][j][1])
 					if intVal[i][j] == 0:
 						prob = 1.0-prob
+					prob = math.log10(prob)
 					classResults[image][classVal] += prob
 
 	for imageResults in classResults:
 		max_value = max(imageResults)
 		max_index = imageResults.index(max_value)
-		print max_value, max_index
 		mapResults.append(max_index)
 	
 	return mapResults
 
-# def evaluation():
+def evaluation(testingResults, testLabels):
+	success = 0.0
+	attempts = 0.0
+	for i in range(0, len(testLabels)):
+		if testingResults[i] == testLabels[i]:
+			success += 1.0
+		attempts += 1.0
+	return (100*success)/attempts
 
 def main():
 	print "Reading Training Data"
@@ -152,19 +159,19 @@ def main():
 	trainingData = storeTrainingData(trainingImages, trainingLabels, trainingClassFrequencies)
 	print "Training Data Evaluation Complete"
 	print "Laplacian Smoothing of Training Data Initiated...."
-	laplacianSmoothing(trainingData, 1, 10)
+	laplacianSmoothing(trainingData, 0.1, 10)
 	print "Laplacian Smoothing Complete"
 	print "Reading Training Data"
 	testImages = readImages("testImages")
 	testLabels = readLabels("testLabels")
 	print "Training Data Reading Complete"
 	print "Evaluating Test Images"
-	testing(testImages, trainingData, trainingClassFrequencies)
+	testingResults = testing(testImages, trainingData, trainingClassFrequencies)
 	print "Test Images Evaluated"
 	print "Evaluating Results"
-	# evaluation()
+	percentageCorrect = evaluation(testingResults, testLabels)
 	print "Results Evaluated"
-	print "The Bayes Classifier has correctly identified ", 10, "% of the correctly"
+	print "The Bayes Classifier has correctly identified ", percentageCorrect, "% of the correctly"
 	
 if __name__ == '__main__':
 	main()
