@@ -37,7 +37,6 @@ def drawImage(pixelData, filename):
 		for j in range(0,28):
 			a = math.log10(float(pixelData[i][j][0])/float(pixelData[i][j][1]))
 			data += chr(int(255+(63*a))) + chr(int(255-127*abs(2+a))) + chr(int(0-(63*a)))
-		# data += chr(255) + chr(128) + chr(128)
 	im = Image.frombytes("RGB", (28,28), data)
 	im.save(filename, "PNG")
 
@@ -47,8 +46,8 @@ def drawOddsRatio(pixelData1, pixelData2, filename):
 	for i in range(0,28):
 		for j in range(0,28):
 			a = math.log10(float(pixelData1[i][j][0])/float(pixelData1[i][j][1]))-math.log10(float(pixelData2[i][j][0])/float(pixelData2[i][j][1]))
-			data += chr(int(255+(63*a))) + chr(int(255-127*abs(2+a))) + chr(int(0-(63*a)))
-		# data += chr(255) + chr(128) + chr(128)
+			a = min(4, a+3)
+			data += chr(int(63*a)) + chr(int(255-127*abs(2-a))) + chr(int(255-(63*a)))
 	im = Image.frombytes("RGB", (28,28), data)
 	im.save(filename, "PNG")
 
@@ -209,7 +208,7 @@ def computeConfusionMatrix(testingResults, testLabels):
 
 #This function computes two specific images for every class that have the highest and lowest posterior probability value respectively.
 #This function makes it possible to identify normalized shapes that the classifier recognizes, to more deviant shapes of digits that 
-#the classifier struggles to identify.
+#the classifier struggles to identify
 def posteriorProb(testImages, testLabels, trainingData, trainingClassFrequencies, highIdxs, lowIdxs):
 	#Initialize the index list for all classes
 	myIdx = [[-1,-1], [-1,-1], [-1,-1], [-1,-1], [-1,-1], [-1,-1], [-1,-1], [-1,-1], [-1,-1], [-1,-1]]
@@ -237,7 +236,7 @@ def posteriorProb(testImages, testLabels, trainingData, trainingClassFrequencies
 	return myIdx
 
 #This is the main function, which calls all functions needed to run the Bayesian classifier in order of initializing data, training the data,
-#testing the data, evaluating the data, and finally generating data analysis for the classifier and the data.
+#testing the data, evaluating the data, and finally generating data analysis for the classifier and the data itself
 def main():
 	print "Reading Training Data"
 	trainingImages = readImages("trainingImages")
@@ -284,9 +283,9 @@ def main():
 	print "Finished Calculating Images With Highest and Lowest Posterior Prob"
 
 	print "Drawing Images..."
-	drawImage(trainingData[4], "likelihood1.png")
-	drawImage(trainingData[9], "likelihood2.png")
-	# drawOddsRatio(trainingData[4], trainingData[9], "oddsRatio.png")
+	drawImage(trainingData[5], "likelihood1.png")
+	drawImage(trainingData[3], "likelihood2.png")
+	drawOddsRatio(trainingData[5], trainingData[3], "oddsRatio.png")
 	print "Images Drawn to likelihood1.png, likelihood2.png, and oddsRatio.png"
 
 if __name__ == '__main__':
