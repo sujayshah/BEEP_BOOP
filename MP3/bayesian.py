@@ -30,11 +30,9 @@ def writeOutput(data):
 def drawImage(pixelData, filename):
 	data = ""
 	for i in range(0,112*112):
-	    data += chr(0) + chr(255) + chr(0)
-	    a = math.log10(float(pixelData[0][0][0])/float(pixelData[0][0][1]))
-	    print a
-	    print type(data)
-	    raw_input("enter")
+		a = math.log10(float(pixelData[0][0][0])/float(pixelData[0][0][1]))
+		# data += chr(255-(63*a)) + chr(0) + chr(0-(63*a))
+		data += chr(255) + chr(128) + chr(128)
 	im = Image.frombytes("RGB", (112,112), data)
 	im.save(filename, "PNG")
 
@@ -183,6 +181,29 @@ def computeConfusionMatrix(testingResults, testLabels):
 
 	return confusionMatrix
 
+def posteriorProb(testImages, testLabels, trainingData, trainingClassFrequencies, highIdxs, lowIdxs):
+	myIdx = [[-1,-1], [-1,-1], [-1,-1], [-1,-1], [-1,-1], [-1,-1], [-1,-1], [-1,-1], [-1,-1], [-1,-1]]
+	for value in range(0,10):
+		highIdxs.append(-100)
+		lowIdxs.append(100)
+		for image in range(0, len(testLabels)/28):
+			if testLabels[image] == value:
+				prob = math.log10(trainingClassFrequencies[value])
+				for i in range(0,28):
+					for j in range(0,28):
+						if testImages[28*image+i][j] == '+' or testImages[28*image+i][j] == '#':
+							prob += math.log10(float(trainingData[value][i][j][0])/float(trainingData[value][i][j][1])) 
+						else:
+							prob += math.log10(1.0-(float(trainingData[value][i][j][0])/float(trainingData[value][i][j][1])))
+				if prob > highIdxs[value]:
+					highIdxs[value] = prob
+					myIdx[value][0] = image
+				if prob < lowIdxs[value]:
+					lowIdxs[value] = prob
+					myIdx[value][1] = image
+
+	return myIdx
+
 def main():
 	print "Reading Training Data"
 	trainingImages = readImages("trainingImages")
@@ -221,6 +242,13 @@ def main():
 	for i in range(0,10):
 		print confusionMatrix[i]
 	print "\n"
+	print "Calculating Images in Each Class With Highest and Lowest Posterior Prob"
+	highIdxs = []
+	lowIdxs = []
+	myIdx = posteriorProb(testImages, testLabels, trainingData, trainingClassFrequencies, highIdxs, lowIdxs)
+	print myIdx
+	print "Finished Calculating Images With Highest and Lowest Posterior Prob"
+
 	print "Drawing Images..."
 	drawImage(trainingData[4], "likelihood1.png")
 	# drawImage(trainingData[9], "likelihood2.png")
