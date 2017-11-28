@@ -27,12 +27,16 @@ def writeOutput(data):
 		file.write('\n')
 	file.close()
 
-def drawImage(pixelData):
+def drawImage(pixelData, filename):
 	data = ""
-	for i in range( 0,28*28 ):
-	    data += chr(128) + chr(128) + chr(255)
-	im = Image.frombytes("RGB", (28,28), data)
-	im.save("test.png", "PNG")
+	for i in range(0,112*112):
+	    data += chr(0) + chr(255) + chr(0)
+	    a = math.log10(float(pixelData[0][0][0])/float(pixelData[0][0][1]))
+	    print a
+	    print type(data)
+	    raw_input("enter")
+	im = Image.frombytes("RGB", (112,112), data)
+	im.save(filename, "PNG")
 
 def priorFrequencies(trainingLabels):
 	classFrequency = {}
@@ -145,6 +149,40 @@ def evaluation(testingResults, testLabels):
 		attempts += 1.0
 	return (100*success)/attempts
 
+def digitEvaluation(testingResults, testLabels):
+	digitCorrect = []
+	for i in range(0,10):
+		success = 0.0
+		attempts = 0.0
+		for digitIterator in range(0, len(testLabels)):
+			if testLabels[digitIterator] == i:
+				attempts += 1.0
+				if testingResults[digitIterator] == i:
+					success += 1.0
+		digitCorrect.append(100*success/attempts)
+
+	return digitCorrect
+
+def computeConfusionMatrix(testingResults, testLabels):
+	confusionMatrix = []
+	digitFreq = []
+	for i in range(0,10):
+		confusionMatrix.append([])
+		digitFreq.append(0.0)
+		for j in range(0,10):
+			confusionMatrix[i].append(0.0)
+
+	for value in range(0, len(testLabels)):
+		confusionMatrix[testLabels[value]][testingResults[value]] += 1.0
+		digitFreq[testLabels[value]] += 1.0
+
+	for i in range(0,10):
+		for j in range(0,10):
+			confusionMatrix[i][j] *= 100.0
+			confusionMatrix[i][j] /= digitFreq[i]
+
+	return confusionMatrix
+
 def main():
 	print "Reading Training Data"
 	trainingImages = readImages("trainingImages")
@@ -158,20 +196,36 @@ def main():
 	print "Evaluating Training Data..."
 	trainingData = storeTrainingData(trainingImages, trainingLabels, trainingClassFrequencies)
 	print "Training Data Evaluation Complete"
-	print "Laplacian Smoothing of Training Data Initiated...."
-	laplacianSmoothing(trainingData, 0.1, 10)
+	print "Laplacian Smoothing of Training Data Initiated..."
+	k = 0.1
+	laplacianSmoothing(trainingData, k, 10)
 	print "Laplacian Smoothing Complete"
-	print "Reading Training Data"
+	print "Reading Training Data..."
 	testImages = readImages("testImages")
 	testLabels = readLabels("testLabels")
 	print "Training Data Reading Complete"
-	print "Evaluating Test Images"
+	print "Evaluating Test Images..."
 	testingResults = testing(testImages, trainingData, trainingClassFrequencies)
 	print "Test Images Evaluated"
-	print "Evaluating Results"
+	print "Evaluating Results..."
 	percentageCorrect = evaluation(testingResults, testLabels)
+	digitCorrect = digitEvaluation(testingResults, testLabels)
 	print "Results Evaluated"
-	print "The Bayes Classifier has correctly identified ", percentageCorrect, "% of the correctly"
-	
+	print "With a smoothing constant of", k, ", The Bayes Classifier has correctly identified the digit", percentageCorrect, "% of the time."
+	for i in range(0,10):
+		print "For digit", i, ", The Bayes Classifier correctly identified it", digitCorrect[i], "% of the time."
+	print "Computing Confusion Matrix..."
+	confusionMatrix = computeConfusionMatrix(testingResults, testLabels)
+	print "Confusion Matrix Calculated"
+	print "\n"
+	for i in range(0,10):
+		print confusionMatrix[i]
+	print "\n"
+	print "Drawing Images..."
+	drawImage(trainingData[4], "likelihood1.png")
+	# drawImage(trainingData[9], "likelihood2.png")
+	# drawImage(1, "oddsRatio.png")
+	print "Images Drawn to likelihood1.png, likelihood2.png, and oddsRatio.png"
+
 if __name__ == '__main__':
 	main()
