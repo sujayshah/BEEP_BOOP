@@ -64,7 +64,7 @@ def trainingStep(trainingImages, trainingLabels, alphaVal, bias, randomWeights, 
 	success = []
 	idx = []
 	for i in range(1, epochs):
-		Miss = np.ones(len(trainingLabels))
+		epochRecord = np.zeros(len(trainingLabels))
 		weights[i] = weights[i-1]
 
 		sequence = range(5000)
@@ -78,11 +78,15 @@ def trainingStep(trainingImages, trainingLabels, alphaVal, bias, randomWeights, 
 				addVal = np.sum(product)
 				evaluation.append(addVal)
 
-			if i == 1 and number == 0:
-				print evaluation
+			if evaluation.index(max(evaluation)) == int(trainingLabels[number]):
+				epochRecord[number] = 1
+			else:
+				learningDecay = float(alphaVal/(alphaVal+float(i)))
+				weightProduct = np.multiply(trainingImages[number], learningDecay)
+				weights[i, evaluation.index(max(evaluation))] = np.subtract(weights[i, evaluation.index(max(evaluation))], weightProduct)
+				weights[i, evaluation.index(max(evaluation))] = np.add(weights[i, evaluation.index(max(evaluation))], weightProduct)
 
-
-	
+	print len(weights[0])
 
 #This function evaluates the performance of the classifier by checking its results for all images against the solutions. The percentage of
 #correct answers is returned back
