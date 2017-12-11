@@ -59,20 +59,29 @@ def trainingStep(trainingImages, trainingLabels, alphaVal, bias, randomWeights, 
 	weights = np.random.rand(epochs, 10, numDigits)
 	if randomWeights == True:
 		weights = np.random.rand(epochs, 10, numDigits)
+	print len(weights)
 
 	success = []
 	idx = []
 	for i in range(1, epochs):
 		Miss = np.ones(len(trainingLabels))
 		weights[i] = weights[i-1]
+
+		sequence = range(5000)
 		if trainingOrder:
-			order = 
-		else
-			order = 
+			random.shuffle(sequence)
+
+		for number in sequence:
+			evaluation = []
+			for classVal in  range(0, 10):
+				product = np.multiply(weights[i, classVal], trainingImages[number])
+				addVal = np.sum(product)
+				evaluation.append(addVal)
+
+			if i == 1 and number == 0:
+				print evaluation
 
 
-#This function applies the trained Bayesian classifier by giving a new set of data to blindly identify using only data collected in the training stage
-def testing(testImages, trainingData, trainingClassFrequencies):	
 	
 
 #This function evaluates the performance of the classifier by checking its results for all images against the solutions. The percentage of
@@ -174,7 +183,7 @@ def main(alphaVal,bias,randomWeights,trainingOrder,epochs):
 	# print "Test Images Evaluated"
 	
 if __name__ == '__main__':
-	main(100, True, True, False, 100)
+	main(100, True, True, True, 100)
 # 	while 1:
 # 		alphaVal = raw_input("Choose Alpha Value for Learning Rate Decay Function: ")
 # 		try:
