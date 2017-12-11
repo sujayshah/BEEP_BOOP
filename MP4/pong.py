@@ -113,19 +113,32 @@ def move_paddle(state, action):
 
 	state.paddle_y = state.paddle_y + state.action[action]
 
+def maptoidx(state)
+	ten_thousand = state.ball_x * (10000)
+	thousand = state.ball_y * (1000)
+	hundred = state.velocity_x * (100)
+	ten = state.velocity_y * 10 
+
+	final = ten_thousand + thousand + hundred + ten + state.paddle_y 
+	return final
+
 def main():
-	# IN CASE OF BUGS IMPOSE ADDITIONAL VELOCITY BOUNDS 
+	# IN CASE OF BUGS IMPOSE ADDITIONAL VELOCITY BOUNDS
+	# Q table
+	q_table = []
+
+	#initialize board
 	paddle_height = 0.2
 	board = gameState(0.5, 0.5, 0.03, 0.01, 0.5 - paddle_height/2)
 	
 	#observe current state and convert from continuous to discrete space
 	discretized_board = discretize(board)
 
-	# #Terminal state check
-	# if discretized_board!= None:
-	#  	if discretized_board.state == 1:
-	#  		return None
-	#  	else:
+	#Terminal state check
+	if discretized_board!= None:
+	 	if discretized_board.state == 1:
+	 		return None
+	 	else:
 			#choose an action based on exploration policy
 
 			#update paddle
