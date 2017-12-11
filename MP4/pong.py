@@ -51,9 +51,41 @@ def play_game():
 		if abs(board.velocity_x) <= 0.03:
 			print "VELOCITY_X ERROR"
 
+#This function takes a game state and discretizes it
+def discretize(state): 
+	paddle_height = 0.2
+	#treat the entire board as a 12x12 grid so there are 144 possible ball locations
+	
+	#discretize the x velocity
+	if state.velocity_x < 0: 
+		state.velocity_x = -1 
+	else if state.velocity_x >= 0:
+		state.velocity_x = 1
 
-def main(): 
+	#discretize the y velocity
+	if abs(state.velocity_y) < 0.015:
+		state.velocity_y = 0
+	else if state.velocity_y < 0: 
+		state.velocity_y = -1
+	else if state.velocity_y >=0: 
+		state.velocity_y = 1
+
+	#convert paddle location
+	discrete_paddle = floor(12 * state.paddle_y/ (1- paddle_height))
+	if state.paddle_y == (1- paddle_height):
+		discrete_paddle = 11
+
+	#add special state for when ball passes paddle with reward -1 
+	#should stay in this state regardless of ball's velocity or paddle's location
+	if state.ball_x > 1:
+		state.special = 1
+
+
+def main():
+	# IN CASE OF BUGS IMPOSE ADDITIONAL VELOCITY BOUNDS 
+	# TERMINATION??
 	play_game()	
+
 
 if __name__ == '__main__':
 	main()
