@@ -69,6 +69,11 @@ def discretize(state):
 	if state.special == 1:
 		return None
 
+	#add special state for when ball passes paddle with reward -1 
+	#should stay in this state regardless of ball's velocity or paddle's location
+	if state.ball_x > 1:
+		state.special = 1
+
 	paddle_height = 0.2
 	#treat the entire board as a 12x12 grid so there are 144 possible ball locations
 	state.ball_x = math.floor(12 * state.ball_x)
@@ -95,11 +100,6 @@ def discretize(state):
 
 	state.paddle_y = discrete_paddle
 
-	#add special state for when ball passes paddle with reward -1 
-	#should stay in this state regardless of ball's velocity or paddle's location
-	if state.ball_x > 1:
-		state.special = 1
-
 	return state
 
 #Given a state and an action (nothing, UP, DOWN), this function moves the paddle
@@ -113,34 +113,45 @@ def move_paddle(state, action):
 
 	state.paddle_y = state.paddle_y + state.action[action]
 
-def maptoidx(state)
+def maptoidx(state):
 	ten_thousand = state.ball_x * (10000)
 	thousand = state.ball_y * (1000)
 	hundred = state.velocity_x * (100)
 	ten = state.velocity_y * 10 
 
 	final = ten_thousand + thousand + hundred + ten + state.paddle_y 
+	final = hash(final) % 10369 
+	final = int(final)
 	return final
 
 def main():
 	# IN CASE OF BUGS IMPOSE ADDITIONAL VELOCITY BOUNDS
 	# Q table
-	q_table = []
+	q_table = [(0, 50, 100)] * 10369
 
 	#initialize board
 	paddle_height = 0.2
 	board = gameState(0.5, 0.5, 0.03, 0.01, 0.5 - paddle_height/2)
+
 	
 	#observe current state and convert from continuous to discrete space
 	discretized_board = discretize(board)
+	print discretized_board.ball_x
+	print discretized_board.ball_y 
+	print discretized_board.velocity_x 
+	print discretized_board.velocity_y 
+	print discretized_board.paddle_y 
+	print discretized_board.special
 
 	#Terminal state check
-	if discretized_board!= None:
-	 	if discretized_board.state == 1:
-	 		return None
-	 	else:
-			#choose an action based on exploration policy
-
+	# if discretized_board!= None:
+	if discretized_board.special == 1:
+		return None
+	else:
+		#choose an action based on exploration policy
+		q_idx = maptoidx(discretized_board)
+		a = q_table[q_idx].index(max(q_table[q_idx][0], q_table[q_idx][1], q_table[q_idx][2]))
+		# print a
 			#update paddle
 
 			#given action and current state get successor state
