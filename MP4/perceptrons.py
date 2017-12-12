@@ -21,6 +21,8 @@ def readImages(filename):
 
 	return lineText
 
+#This function reads the file data in string format and converts it to a list of integers.
+#This makes subsequent computing much easier.
 def convertImages(images):
 	binaryImage = []
 	for imageIndex in images:
@@ -44,48 +46,35 @@ def readLabels(filename):
 	textFile.close()
 	return lineText
 
-#The purpose of this function is to create the training stage of the Bayesian classifier.
-def trainingStep(trainingImages, trainingLabels, alphaVal, bias, randomWeights, trainingOrder, epochs):
+#The purpose of this function is to train the perceptron classifier using the parameters given and adjusting the weight of each image per epoch
+def trainingStep(trainingImages, trainingLabels, alphaVal, trainingOrder, epochs, weights):
 	trainingImages = np.array(trainingImages)
 	trainingLabels = np.array(trainingLabels)
-
-	if bias == True:
-		trainingImages = np.insert(trainingImages,0,1,axis=1)
-
-	weights = np.zeros((epochs, 10, 28*28))
-	if randomWeights == True:
-		weights = np.random.rand(epochs, 10, 28*28)
-
-	success = []
-	idx = []
 	for i in range(1,epochs):
 		weights[i]=weights[i-1]
-		Miss=np.ones(5000)
+		numberSuccess = 0.0
 		sequence = range(5000)
 		if trainingOrder:
 			random.shuffle(sequence)
 	
 		for number in sequence:
 			result=[]
-			for cla in range(10):
-				result.append(np.sum(np.multiply(weights[i,cla],trainingImages[number])))
+			for classVal in range(10):
+				product = np.multiply(weights[i,classVal],trainingImages[number])
+				sumVal = np.sum(product)
+				result.append(sumVal)
 		
-			prediction=result.index(max(result))
-			truth=int(trainingLabels[number])
+			guessVal=result.index(max(result))
 
-			if truth==prediction:
-				Miss[number]=0
+			if result.index(max(result))==int(trainingLabels[number]):
+				numberSuccess += 1.0
 			else:
-				decayVal = float(alphaVal) / float(float(alphaVal) + float(i))
-				mult= np.multiply(trainingImages[number],alphaVal/(alphaVal + float(i)))
-				weights[i,prediction]= np.subtract(weights[i,prediction],mult)
-				weights[i,truth]=np.add(weights[i,truth],mult)
+				decayVal = float (alphaVal / (alphaVal + float(i)))
+				decayProduct= np.multiply(trainingImages[number],decayVal)
+				weights[i,guessVal]= np.subtract(weights[i,guessVal],decayProduct)
+				weights[i,int(trainingLabels[number])]=np.add(weights[i,int(trainingLabels[number])],decayProduct)
 
-		print('ep:',i,' accy: ', 1-np.sum(Miss)/5000)
-		success.append(1-np.sum(Miss)/5000)
-		idx.append(i)
-
-	return weights[epochs-1]
+		print 'Epoch #',i,': Training Accuracy:', numberSuccess/5000.0
 
 #This function evaluates the performance of the classifier by checking its results for all images against the solutions. The percentage of
 #correct answers is returned back
@@ -96,7 +85,7 @@ def evaluation(testingResults, testLabels):
 		if testingResults[i] == testLabels[i]:
 			success += 1.0
 		attempts += 1.0
-	return (100*success)/attempts
+	print "The overall accuracy for the perceptron classifier is", 100*success/attempts, "%"
 
 #This function is similar to the above evaluation function. This function calculates the individual performance by the classifier on
 #all individual classes, giving a percentage correct based on the number of actual instances of the class value in the test label data
@@ -110,11 +99,12 @@ def digitEvaluation(testingResults, testLabels):
 				attempts += 1.0
 				if testingResults[digitIterator] == i:
 					success += 1.0
-		digitCorrect.append(100*success/attempts)
+		digitCorrect.append(success/attempts)
+	print "Accuracy by digit:"
+	for i in range(0, len(digitCorrect)):
+		print i, ": ", 100*digitCorrect[i], "%"
 
-	return digitCorrect
-
-#This function computes the confusion matrix for the Bayesian classifier that gives the classifier's performance for all classes and provides a 
+#This function computes the confusion matrix for the Perceptron classifier that gives the classifier's performance for all classes and provides a 
 #breakdown on the distribution of guesses by the classifier given any actual class value of an image
 def computeConfusionMatrix(testingResults, testLabels):
 	confusionMatrix = []
@@ -129,110 +119,111 @@ def computeConfusionMatrix(testingResults, testLabels):
 		confusionMatrix[testLabels[value]][testingResults[value]] += 1.0
 		digitFreq[testLabels[value]] += 1.0
 		# returns the confusion matrix data as percentages
+	print "Confusion Matrix:"
 	for i in range(0,10):
 		for j in range(0,10):
-			confusionMatrix[i][j] *= 100.0
 			confusionMatrix[i][j] /= digitFreq[i]
+		print confusionMatrix[i]
 
-	return confusionMatrix
+# This function uses the final weights calculated by the perceptron classifier for each class and multiplies each test images by it
+# and makes a guess based on which value is highest as a result of the multiplication.
+def testingStep(testImages, testLabels, weights):
+	prediction=[]
+	for numberSample in range(0, len(testLabels)):
+		result=[]
+		for classVal in range(0, 10):
+			product = np.multiply(weights[classVal],testImages[numberSample])
+			sumVal = np.sum(product)
+			result.append(sumVal)
+		prediction.append(result.index(max(result)))
+	return prediction
 
-#This function computes two specific images for every class that have the highest and lowest posterior probability value respectively.
-#This function makes it possible to identify normalized shapes that the classifier recognizes, to more deviant shapes of digits that 
-#the classifier struggles to identify
-def posteriorProb(testImages, testLabels, trainingData, trainingClassFrequencies, highIdxs, lowIdxs):
-	#Initialize the index list for all classes
-	myIdx = [[-1,-1], [-1,-1], [-1,-1], [-1,-1], [-1,-1], [-1,-1], [-1,-1], [-1,-1], [-1,-1], [-1,-1]]
-	for value in range(0,10):
-		highIdxs.append(-100)
-		lowIdxs.append(100)
-		for image in range(0, len(testLabels)):
-			if testLabels[image] == value:
-				prob = math.log10(trainingClassFrequencies[value])
-				#iterate through each image of a class and calculate the posterior probabilities by iterating through all pixels
-				for i in range(0,28):
-					for j in range(0,28):
-						if testImages[28*image+i][j] == '+' or testImages[28*image+i][j] == '#':
-							prob += math.log10(float(trainingData[value][i][j][0])/float(trainingData[value][i][j][1])) 
-						else:
-							prob += math.log10(1.0-(float(trainingData[value][i][j][0])/float(trainingData[value][i][j][1])))
-				#replace the minima and maxima values if a more extreme value is found
-				if prob > highIdxs[value]:
-					highIdxs[value] = prob
-					myIdx[value][0] = image
-				if prob < lowIdxs[value]:
-					lowIdxs[value] = prob
-					myIdx[value][1] = image
-
-	return myIdx
-
-#This is the main function, which calls all functions needed to run the Bayesian classifier in order of initializing data, training the data,
-#testing the data, evaluating the data, and finally generating data analysis for the classifier and the data itself
+#This is the main function, which calls all functions needed to run the Perceptron classifier in order of initializing data, training the data,
+#testing the data, evaluating the data, and generating a confusion matrix based on results
 def main(alphaVal,bias,randomWeights,trainingOrder,epochs):
 	print "Reading Training Data"
 	trainingImages = convertImages(readImages("trainingImages"))
 	trainingLabels = readLabels("trainingLabels")
 	print "Training Data Reading Complete"
 
+	if bias == True:
+		trainingImages = np.insert(trainingImages,0,1,axis=1)
+
+	numDigits = len(trainingImages[0])
+	weights = np.zeros((epochs, 10, numDigits))
+	if randomWeights == True:
+		weights = np.random.rand(epochs, 10, numDigits)
+
 	print "Evaluating Training Data..."
-	trainingData = trainingStep(trainingImages, trainingLabels, alphaVal, bias, randomWeights, trainingOrder, epochs)
+	trainingStep(trainingImages, trainingLabels, alphaVal, trainingOrder, epochs, weights)
 	print "Training Data Evaluation Complete"
 
-	# print "Reading Training Data..."
-	# testImages = readImages("testImages")
-	# testLabels = readLabels("testLabels")
-	# print "Training Data Reading Complete"
-	# print "Evaluating Test Images..."
-	# testingResults = testing(testImages, trainingData, trainingClassFrequencies)
-	# print "Test Images Evaluated"
-	
-if __name__ == '__main__':
-	main(100, False, False, False, 100)
-# 	while 1:
-# 		alphaVal = raw_input("Choose Alpha Value for Learning Rate Decay Function: ")
-# 		try:
-# 	    		int(alphaVal)
-# 	    		alphaVal = int(alphaVal)
-# 	    		break
-# 		except ValueError:
-# 	    		print "Not an int"
-# # ----------------------------------------------------------------
-# 	while 1:
-# 		bias = raw_input("Input 0 to exclude bias or 1 to include bias: ")
-# 		if bias == '0':
-# 			bias = False
-# 			break
-# 		elif bias == '1':
-# 			bias = True
-# 			break
-# 		print "Not a valid input"
-# # ----------------------------------------------------------------
-# 	while 1:
-# 		initWeights = raw_input("Input 0 to initialize zero for weights or 1 to randomize weights: ")
-# 		if initWeights == '0':
-# 			initWeights = False
-# 			break
-# 		elif initWeights == '1':
-# 			initWeights = True
-# 			break
-# 		print "Not a valid input"
-# # ----------------------------------------------------------------
-# 	while 1:
-# 		trainingOrder = raw_input("Input 0 to fix training order example order or 1 to randomize training example order: ")
-# 		if trainingOrder == '0':
-# 			trainingOrder = False
-# 			break
-# 		elif trainingOrder == '1':
-# 			trainingOrder = True
-# 			break
-# 		print "Not a valid input"
-# # ----------------------------------------------------------------
-# 	while 1:
-# 		epochs = raw_input("Choose number of epochs: ")
-# 		try:
-# 	    		int(epochs)
-# 	    		epochs = int(epochs)
-# 	    		break
-# 		except ValueError:
-# 	    		print "Not an int"
+	print "Reading Testing Data..."
+	testImages = convertImages(readImages("testImages"))
+	testLabels = readLabels("testLabels")
+	print "Test Data Reading Complete"
 
-# 	main(alphaVal,bias,initWeights,trainingOrder,epochs)
+	if bias == True:
+		testImages = np.insert(testImages,0,1,axis=1)
+
+	print "Evaluating Testing Data"
+	testingResults = testingStep(testImages, testLabels, weights[-1])
+	print "Testing Complete"
+
+	print "Evaluating Results"
+	evaluation(testingResults, testLabels)
+	digitEvaluation(testingResults, testLabels)
+	computeConfusionMatrix(testingResults, testLabels)
+	print "Evalution Complete"
+
+# The parameters for the perceptron classifier are input manually
+if __name__ == '__main__':
+	while 1:
+		alphaVal = raw_input("Choose Alpha Value for Learning Rate Decay Function: ")
+		try:
+	    		float(alphaVal)
+	    		alphaVal = float(alphaVal)
+	    		break
+		except ValueError:
+	    		print "Not a float"
+# ----------------------------------------------------------------
+	while 1:
+		bias = raw_input("Input 0 to exclude bias or 1 to include bias: ")
+		if bias == '0':
+			bias = False
+			break
+		elif bias == '1':
+			bias = True
+			break
+		print "Not a valid input"
+# ----------------------------------------------------------------
+	while 1:
+		initWeights = raw_input("Input 0 to initialize zero for weights or 1 to randomize weights: ")
+		if initWeights == '0':
+			initWeights = False
+			break
+		elif initWeights == '1':
+			initWeights = True
+			break
+		print "Not a valid input"
+# ----------------------------------------------------------------
+	while 1:
+		trainingOrder = raw_input("Input 0 to fix training order example order or 1 to randomize training example order: ")
+		if trainingOrder == '0':
+			trainingOrder = False
+			break
+		elif trainingOrder == '1':
+			trainingOrder = True
+			break
+		print "Not a valid input"
+# ----------------------------------------------------------------
+	while 1:
+		epochs = raw_input("Choose number of epochs: ")
+		try:
+	    		int(epochs)
+	    		epochs = int(epochs)
+	    		break
+		except ValueError:
+	    		print "Not an int"
+
+	main(alphaVal,bias,initWeights,trainingOrder,epochs)
