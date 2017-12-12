@@ -7,7 +7,7 @@ import math
 # N= [list([0, 0, 0])] * 10369
 q_table = {}
 N = {}
-C= 100
+epsilon = 0.3
 
 # This function udpates the ball position and checks the bounce/termination conditions. Returns a state
 def play_game(state, action): 
@@ -17,6 +17,7 @@ def play_game(state, action):
 		#print "TERMINAL STATE. GAME OVER"
 		return None
 
+	reward = 0 
 	paddle_height = 0.2
 
 	state.paddle_y = state.paddle_y + state.actions[action]
@@ -56,7 +57,7 @@ def play_game(state, action):
 	if state.ball_x < 0: 
 		state.ball_x = -1 * state.ball_x 
 		state.velocity_x = -1 * state.velocity_x
-		if abs(board.velocity_x) <= 0.03:
+		if abs(state.velocity_x) <= 0.03:
 			print "VELOCITY_X ERROR"
 
 	#if ball bounced off paddle:
@@ -87,8 +88,7 @@ def play_game(state, action):
 		reward = -1
 		print "w a o w"
 
-	newstate = gameState(state.ball_x, state.ball_y, state.velocity_x, state.velocity_y, state.paddle_y)
-	return (newstate, reward)
+	return (state.ball_x, state.ball_y, state.velocity_x, state.velocity_y, state.paddle_y, reward)
 
 #This function takes a game state and discretizes it
 def discretize(state): 
@@ -103,31 +103,31 @@ def discretize(state):
 
 	paddle_height = 0.2
 	#treat the entire board as a 12x12 grid so there are 144 possible ball locations
-	state.ball_x = math.floor(12 * state.ball_x)
-	state.ball_y = math.floor(12 * state.ball_y)
+	ball_x = math.floor(12 * state.ball_x)
+	ball_y = math.floor(12 * state.ball_y)
 	
 	#discretize the x velocity
 	if state.velocity_x < 0: 
-		state.velocity_x = -1 
+		velocity_x = -1 
 	elif state.velocity_x >= 0:
-		state.velocity_x = 1
+		velocity_x = 1
 
 	#discretize the y velocity
 	if abs(state.velocity_y) < 0.015:
-		state.velocity_y = 0
+		velocity_y = 0
 	elif state.velocity_y < 0: 
-		state.velocity_y = -1
+		velocity_y = -1
 	elif state.velocity_y >=0: 
-		state.velocity_y = 1
+		velocity_y = 1
 
 	#convert paddle location
 	discrete_paddle = math.floor(12 * state.paddle_y/ (1- paddle_height))
 	if state.paddle_y == (1- paddle_height):
 		discrete_paddle = 11
 
-	state.paddle_y = discrete_paddle
+	paddle_y = discrete_paddle
 
-	return state
+	return (ball_x, ball_y, velocity_x, velocity_y, paddle_y)
 
 # def maptoidx(state):
 # 	ten_thousand = state.ball_x * (10000)
@@ -141,24 +141,27 @@ def discretize(state):
 # 	return final
 
 # This function returns the action you should take given a state
-def exploration_policy(state): 
+def exploration_policy(state, israndom): 
 	if state is None or state.special == 1:
 		print "ERROR" 
 		return None
 
-	q_max = -10000000000000
-	for i in range(3):
-		#if N[q_idx][i] < 20 or q_table[q_idx][i] == 0: N[(state, i)] < 20
-		if (discretize(state), i) not in N or (discretize(state), i) not in q_table:
-			a = i 
-			print "chose random"
-			return a
-			
-		if q_table[(discretize(state), i)] > q_max:
-			q_max = q_table[(state, i)]
-			a = i
-			print "chose actual"
-	
+	#with probability e choose randomly 
+	if israndom is True: 
+		a = random.randint(0, 2)
+		return a
+	else:
+		#with probability (1-e) follow the greedy policy 
+		q_max = -10000000000000
+		for i in range(3):
+			if (discretize(state), i) not in N or (discretize(state), i) not in q_table:
+				a = random.randint(0,2)
+				return a 
+
+			if q_table[(discretize(state), i)] > q_max:
+				q_max = q_table[(discretize(state), i)]
+				a = i
+				#print "chose actual"
 	return a
 
 def qmax(state):
@@ -171,12 +174,12 @@ def qmax(state):
 		if (discretize(state), i) not in q_table: 
 			temp_value = 0 
 		else:
-			temp_value = q_table[(state, i)]
+			temp_value = q_table[(discretize(state), i)]
 	
 	return max(temp_value, q_max)
 
 
-def qlearning_agent(alpha_C, gamma):
+def qlearning_agent(C, gamma):
 	# IN CASE OF BUGS IMPOSE ADDITIONAL VELOCITY BOUNDS
 	global q_table 
 	global N 
@@ -184,6 +187,7 @@ def qlearning_agent(alpha_C, gamma):
 	reward = 0 
 	num_bounces = 0 
 	n = 0 # number iterations
+	random_count = 0 
 
 	#initialize board; board is current game state 
 	paddle_height = 0.2
@@ -211,58 +215,64 @@ def qlearning_agent(alpha_C, gamma):
 
 		else:	
 			while True:
+				choose_random = False
 				if current_state == None or current_state.special == 1: 
+					random_count = 0 
 					break
 
-				#choose an action based on exploration policy
-				a = exploration_policy(current_state)
+				random_count +=1 
+				if random_count > 10: 
+					random_count = 1
 
-				#increment number of times seen state action pair (s,a) and use the right alpha
-				# if N[q_idx][a] == 0:
-				# 	N[q_idx][a] = 1
-				# 	alpha = 1.0
-				# else:
-				# 	N[q_idx][a] += 1
-				# 	alpha = 1.0 * (C/(C + N[q_idx][a]))
+				if random_count/10.0 == 0.3:
+					choose_random = True
+
+				#choose an action based on exploration policy
+				a = exploration_policy(current_state, choose_random)
+
+				#given action and current state get successor state
+				temp_tuple= play_game(current_state, a) #final successor state
+				if temp_tuple == None:
+					random_count = 0 
+					break
+				else:
+					#update next game state to successor state
+					successor_state = gameState(temp_tuple[0], temp_tuple[1], temp_tuple[2], temp_tuple[3], temp_tuple[4])	
+					# print "CURRENT: ", (current_state.ball_x, current_state.ball_y, current_state.velocity_x, current_state.velocity_y)
+					# print "SUCCESSOR: ", (successor_state.ball_x, successor_state.ball_y, successor_state.velocity_x, successor_state.velocity_y)
+				
+				reward = temp_tuple[5]
+
 				if (discretize(current_state), a) not in N: 
-					N[(current_state, a)] = 1
+					N[(discretize(current_state), a)] = 1
 					alpha = 1.0 
 				else:
 					N[(discretize(current_state), a)] += 1
-					alpha = 1.0 * (C/(C + N[(current_state, a)]))
-				
-				#given action and current state get successor state
-				temp_tuple= play_game(current_state, a) #final successor state
-
-				if temp_tuple == None:
-					break
-				else:
-					successor_state = temp_tuple[0]
-
-				reward = temp_tuple[1]
-
-				print "CURRENT: ", (current_state.ball_x, current_state.ball_y, current_state.velocity_x, current_state.velocity_y)
-				print "SUCCESSOR: ", (successor_state.ball_x, successor_state.ball_y, successor_state.velocity_x, successor_state.velocity_y)
+					alpha = 1.0 * (C/(C + N[(discretize(current_state), a)]))
 
 				#update q-table with current state and successor state
-				if (current_state, a) not in q_table: 
+				if N[(discretize(current_state), a)] == 1:
 					q_table[(discretize(current_state), a)] = alpha * (reward + gamma * qmax(successor_state))
+				
 				else:
-					q_table[(discretize(current_state), a)] = q_table[(current_state, a)] + (alpha * (reward + (gamma * qmax(successor_state)) - q_table[(discretize(current_state), a)]))
+					q_table[(discretize(current_state), a)] = q_table[(discretize(current_state), a)] + (alpha * (reward + (gamma * qmax(successor_state)) - q_table[(discretize(current_state), a)]))
 				
 				if reward > 0: 
 					num_bounces +=1
-					print "HELLO"
 
-				#update game state to next state
-				# board = successor_state
-				current_state = successor_state
-		
+				current_state = gameState(successor_state.ball_x, successor_state.ball_y, successor_state.velocity_x, successor_state.velocity_y, successor_state.paddle_y)
+				
 		n+=1 
 	return num_bounces
 
 def main(): 
-	bounces = qlearning_agent(100, 0.8)
+	global q_table
+	global N 
+
+	q_table = {}
+	N = {}
+	bounces = qlearning_agent(100, 0.7)
+
 
 
 if __name__ == '__main__':
