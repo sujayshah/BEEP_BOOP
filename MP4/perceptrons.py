@@ -49,44 +49,43 @@ def trainingStep(trainingImages, trainingLabels, alphaVal, bias, randomWeights, 
 	trainingImages = np.array(trainingImages)
 	trainingLabels = np.array(trainingLabels)
 
-	print trainingImages[1]
-
 	if bias == True:
 		trainingImages = np.insert(trainingImages,0,1,axis=1)
 
-	numDigits = len(trainingImages[0])
-
-	weights = np.random.rand(epochs, 10, numDigits)
+	weights = np.zeros((epochs, 10, 28*28))
 	if randomWeights == True:
-		weights = np.random.rand(epochs, 10, numDigits)
-	print len(weights)
+		weights = np.random.rand(epochs, 10, 28*28)
 
 	success = []
 	idx = []
-	for i in range(1, epochs):
-		epochRecord = np.zeros(len(trainingLabels))
-		weights[i] = weights[i-1]
-
+	for i in range(1,epochs):
+		weights[i]=weights[i-1]
+		Miss=np.ones(5000)
 		sequence = range(5000)
 		if trainingOrder:
 			random.shuffle(sequence)
-
+	
 		for number in sequence:
-			evaluation = []
-			for classVal in  range(0, 10):
-				product = np.multiply(weights[i, classVal], trainingImages[number])
-				addVal = np.sum(product)
-				evaluation.append(addVal)
+			result=[]
+			for cla in range(10):
+				result.append(np.sum(np.multiply(weights[i,cla],trainingImages[number])))
+		
+			prediction=result.index(max(result))
+			truth=int(trainingLabels[number])
 
-			if evaluation.index(max(evaluation)) == int(trainingLabels[number]):
-				epochRecord[number] = 1
+			if truth==prediction:
+				Miss[number]=0
 			else:
-				learningDecay = float(alphaVal/(alphaVal+float(i)))
-				weightProduct = np.multiply(trainingImages[number], learningDecay)
-				weights[i, evaluation.index(max(evaluation))] = np.subtract(weights[i, evaluation.index(max(evaluation))], weightProduct)
-				weights[i, evaluation.index(max(evaluation))] = np.add(weights[i, evaluation.index(max(evaluation))], weightProduct)
+				decayVal = float(alphaVal) / float(float(alphaVal) + float(i))
+				mult= np.multiply(trainingImages[number],alphaVal/(alphaVal + float(i)))
+				weights[i,prediction]= np.subtract(weights[i,prediction],mult)
+				weights[i,truth]=np.add(weights[i,truth],mult)
 
-	print len(weights[0])
+		print('ep:',i,' accy: ', 1-np.sum(Miss)/5000)
+		success.append(1-np.sum(Miss)/5000)
+		idx.append(i)
+
+	return weights[epochs-1]
 
 #This function evaluates the performance of the classifier by checking its results for all images against the solutions. The percentage of
 #correct answers is returned back
@@ -187,7 +186,7 @@ def main(alphaVal,bias,randomWeights,trainingOrder,epochs):
 	# print "Test Images Evaluated"
 	
 if __name__ == '__main__':
-	main(100, True, True, True, 100)
+	main(100, False, False, False, 100)
 # 	while 1:
 # 		alphaVal = raw_input("Choose Alpha Value for Learning Rate Decay Function: ")
 # 		try:
