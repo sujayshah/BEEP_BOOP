@@ -7,7 +7,7 @@ import math
 # N= [list([0, 0, 0])] * 10369
 q_table = {}
 N = {}
-epsilon = 0.3
+epsilon = 0.05
 
 # This function udpates the ball position and checks the bounce/termination conditions. Returns a state
 def play_game(state, action): 
@@ -193,12 +193,8 @@ def qlearning_agent(C, gamma):
 	paddle_height = 0.2
 	
 	while n < 100000:
-		if n%1000 == 0:
-			print "n: " + str(n)
-			if n> 0:
-				print "Num_bounces: " + str(num_bounces/1000.0)
-				num_bounces = 0
-
+		#print num_bounces
+		num_bounces = 0 
 		#observe current state and convert from continuous to discrete space
 		#start from scratch
 		board = gameState(0.5, 0.5, 0.03, 0.01, 0.5 - paddle_height/2)
@@ -236,7 +232,6 @@ def qlearning_agent(C, gamma):
 					random_count = 0 
 					break
 				else:
-					#update next game state to successor state
 					successor_state = gameState(temp_tuple[0], temp_tuple[1], temp_tuple[2], temp_tuple[3], temp_tuple[4])	
 					# print "CURRENT: ", (current_state.ball_x, current_state.ball_y, current_state.velocity_x, current_state.velocity_y)
 					# print "SUCCESSOR: ", (successor_state.ball_x, successor_state.ball_y, successor_state.velocity_x, successor_state.velocity_y)
@@ -248,7 +243,7 @@ def qlearning_agent(C, gamma):
 					alpha = 1.0 
 				else:
 					N[(discretize(current_state), a)] += 1
-					alpha = 1.0 * (C/(C + N[(discretize(current_state), a)]))
+					alpha = 1.0 * (C/(C + N[(discretize(current_state), a)])) #decay if we have seen before
 
 				#update q-table with current state and successor state
 				if N[(discretize(current_state), a)] == 1:
@@ -260,19 +255,54 @@ def qlearning_agent(C, gamma):
 				if reward > 0: 
 					num_bounces +=1
 
+				#update next game state to successor state
 				current_state = gameState(successor_state.ball_x, successor_state.ball_y, successor_state.velocity_x, successor_state.velocity_y, successor_state.paddle_y)
 				
 		n+=1 
-	return num_bounces
 
 def main(): 
 	global q_table
 	global N 
 
+	#clear out the qtable and the N table
 	q_table = {}
 	N = {}
-	bounces = qlearning_agent(100, 0.7)
+	qlearning_agent(100, 0.7)
 
+	n = 0 #basically run qlearning again but dont update qtables
+	while n < 1000: 
+		board = gameState(0.5, 0.5, 0.03, 0.01, 0.5 - paddle_height/2)
+		current_state = board
+		while True: 
+			choose_random = False
+			if current_state == None or current_state.special == 1: 
+				random_count = 0 
+				break
+
+			random_count +=1 
+			if random_count > 10: 
+				random_count = 1
+
+			if random_count/10.0 == 0.3:
+				choose_random = True
+
+			#choose an action
+			a = exploration_policy(current_state, False)
+			temp_tuple= play_game(current_state, a) #final successor state
+			if temp_tuple == None:
+				random_count = 0 
+				break
+			else:
+				#update next game state to successor state
+				successor_state = gameState(temp_tuple[0], temp_tuple[1], temp_tuple[2], temp_tuple[3], temp_tuple[4])
+
+			reward = temp_tuple[5]
+			
+			if reward > 0: 
+				num_bounces += 1
+
+			n+= 1
+			
 
 
 if __name__ == '__main__':
